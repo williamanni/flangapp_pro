@@ -1,6 +1,6 @@
 workflows:
   ios-workflow:
-    name: Flangapp PRO iOS with publication
+    name: Flangapp PRO iOS without publication
     max_build_duration: 30
     environment:
       vars:
@@ -72,7 +72,7 @@ workflows:
       - name: Flutter build ipa and automatic versioning
         script: |
           flutter build ipa --release --no-tree-shake-icons \
-          --build-name=1.0.2 \
+          --build-name=1.0.3 \
           --build-number=1 \
           --export-options-plist=/Users/builder/export_options.plist
     artifacts:
@@ -80,11 +80,7 @@ workflows:
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=a8beb987-7a87-0339-5fd8-3226f2f545fb
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=2c154917-f3c2-30c5-bb2d-3cfbbe46a552
