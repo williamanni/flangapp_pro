@@ -56,9 +56,9 @@ android {
     signingConfigs {
         release {
             storeFile file("sign/key.jks")
-            storePassword "BprtpBRMcmfyDepq"
-            keyAlias "vJfJsLgOfw"
-            keyPassword "BprtpBRMcmfyDepq"
+            storePassword "biesse"
+            keyAlias "appbuilder"
+            keyPassword "biesse"
         }
     }
 
