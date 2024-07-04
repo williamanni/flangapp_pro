@@ -1,6 +1,6 @@
 workflows:
   ios-workflow:
-    name: Flangapp PRO iOS without publication
+    name: Flangapp PRO iOS with publication
     max_build_duration: 30
     environment:
       vars:
@@ -18,31 +18,31 @@ workflows:
 
         CERTIFICATE_PRIVATE_KEY: |-
          -----BEGIN RSA PRIVATE KEY-----
-         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
+         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
          -----END RSA PRIVATE KEY-----
          
 
@@ -72,7 +72,7 @@ workflows:
       - name: Flutter build ipa and automatic versioning
         script: |
           flutter build ipa --release --no-tree-shake-icons \
-          --build-name=1.0.3 \
+          --build-name=1.0.2 \
           --build-number=1 \
           --export-options-plist=/Users/builder/export_options.plist
     artifacts:
@@ -80,7 +80,11 @@ workflows:
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=2c154917-f3c2-30c5-bb2d-3cfbbe46a552
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=ff84c206-e845-025d-235c-87998338d125
