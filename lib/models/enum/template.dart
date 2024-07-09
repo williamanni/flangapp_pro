@@ -1,1 +1,1 @@
-enum Template { drawer, tabs, bar, blank }
+enum Template { drawerBar, tabsBar, bar, tabs, blank }
