@@ -1,0 +1,86 @@
+workflows:
+  ios-workflow:
+    name: Flangapp PRO iOS without publication
+    max_build_duration: 30
+    environment:
+      vars:
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        APP_STORE_CONNECT_ISSUER_ID: 69a6de77-1782-47e3-e053-5b8c7c11a4d1
+        APP_STORE_CONNECT_KEY_IDENTIFIER: BKD935QVN7
+        APP_STORE_CONNECT_PRIVATE_KEY: |-
+         -----BEGIN PRIVATE KEY-----
+         MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgQ2MUxpBhgboscItX
+         RA8qMLW1IZUKTIsXsj028z8/MfmgCgYIKoZIzj0DAQehRANCAASZ3cger7v53amY
+         rHhXOtOst42mDyIbUpVqZDGGz/dzqAknsFHbCPosNCteGlXS8CPihKDNvWWt20Ho
+         DVnvY2fc
+         -----END PRIVATE KEY-----
+
+        CERTIFICATE_PRIVATE_KEY: |-
+         -----BEGIN RSA PRIVATE KEY-----
+         MIIEoAIBAAKCAQEArKG6k67QnLdhBD2KmrOGgpfm5GPOKyxlr/nNszXOR3OUtv6E
+         tj7s2QqX7T1vIzFWWW5EZtE7d5X8HkpILD50tUbV4D0COJhtY6x+SOMEj6Y6UXBb
+         3aOOYlCexuvrawWfpPkcPH8y8W5A1vEHs2msUkqa7SC4/0CGyAMtPGcqu9ja01we
+         aKlDmha7Q5qOgIAoERAYRazziUAZD7zSbBI3z3lVcphxZGPSGT127wY8IiNjzu2h
+         aOISZI6K2DJ3p5GqubERUcg9SDogKF4ZBVwuvuDNJL6b7J3HxsbcZDtJc9MHruYq
+         TJQn1/IFCjpkzli8DboLKIG4W16rPWmMe8+0hQIDAQABAoH/R99jDpl5wRrtXsFA
+         iP1gGH77DPDV+qOWspgOTCPaqLo2RaSHHFlBGBvmT5+EOzgPUKyCo0v5YOXQ/HYb
+         a6WVHDlMUk++3PvujyZXGCwWz2J7D+z3p7oF+GjDB46xikfib4zyHz3WDS5vUGM0
+         EZOtaurPaxUfRdECTG5bfF/M1ZKD4Y6CTyHm3aBO3J8LzILK/PmHsLZMyvFwoXnQ
+         NXUICa7S4HHUJH5/Qr2mIvPkRQVqukWPMdn3kcQqkgjRGs0HyJIiYuPi9wZcuf3G
+         exHkNPJAG/AhuegyAxf/I1nGWFIRAeaHn6gikzBdpYPbVeESOreHAQOYsofyv76m
+         5K0BAoGBAMF5SB3kD1ESEcV4MUhv/aQi8xoMLdb60b3nJNZ0lhpw7R64wBMXPUlg
+         PUDUzHztuz8WL+c8+5tx2itrLKpzes6ofQo+ieF3B9TuCJ7/c2IYEtgVHJ+YC6ag
+         UJ0ARJjEbYEJeEuyoKTnz/i3eJ2y4CD25Vb0mxXLXh/goztQURkBAoGBAORsHqyT
+         ErxLGsKVVq4jMAfV2hjZcLlEY8oRYKzcnV07NK15wEGrcw8EFqVInihachqEP1b5
+         eZddBxJbhvkaljwjxlbXI0hZg/j11PjKCLssf5lBnprcLwpTmnR5v0GHViBhDhr9
+         lNEK+fWAFAi3oHX/6+fpvlzM8ZVMTHWqzreFAoGAbIUyxlFdpgOUpEa+nfrzMlXI
+         NhwOuj8F1pcIOqI6b6pX1puaYRrv7XBl6y9xY8GU/dXcGMBEAPTjgucirpkHkVNA
+         j7Z0cFrrsauyejye467NIxb0bzBBmLzjeqzjzSygn3hIWW1gXh8IsGF47jufK95Q
+         1W1ub9MagJbn+CUc2AECgYAxnHIFFWRqVP2Y6YqMA8R4zy+xWfirpHjv+FpA8SGU
+         kDlevCTPnoc86axpdZ40MYC61aJUJ5cLEv9oM0zbabTblwGK9usI2bhaKDp7VpYS
+         4RVNmfzysYPeAE55ob+yYcyI98tyfUUHKhUkBw9S3V8SgeUg15mq2jBWNt4caF7B
+         aQKBgD2YLSQEyh7AFeiCOYoiNiAOE3DMkoKHvEJMbKfGWSA/2WKda054s6uBIbeN
+         vx+1UfHMHBmZWgis4VObEzILAaqaTPckcayITMKEaiGPXGLl3w15bxlofbH2Q5/t
+         nhZI8sWnpCkDF67KX2MzyHOUJob6fLH4cAIqmtj43ef62qy9
+         -----END RSA PRIVATE KEY-----
+         
+
+        BUNDLE_ID: "it.bsslab.apppetitenew"
+      flutter: 3.16.7
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up keychain to be used for codesigning using Codemagic CLI 'keychain' command
+        script: |
+          keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files $BUNDLE_ID --type IOS_APP_STORE --create --log-api-calls --verbose
+      - name: Use system default keychain
+        script: |
+          keychain add-certificates
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: |
+          cd . && flutter packages pub get
+      - name: Install pods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+      - name: Flutter build ipa and automatic versioning
+        script: |
+          flutter build ipa --release --no-tree-shake-icons \
+          --build-name=1.0.0 \
+          --build-number=1 \
+          --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      scripts:
+        - name: HTTP notification
+          script: |
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=492e6931-804d-95ca-ec50-7f112be73eb4
