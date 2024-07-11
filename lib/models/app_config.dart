@@ -96,6 +96,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['value'],
+        refresh: itemJson['refresh'] ?? true, // TODO - update with the correct field after BE work is done
       );
     }).toList();
     List<dynamic> navigationItemsJsonBar = json['navigation']['bar'];
@@ -105,6 +106,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['value'],
+        refresh: itemJson['refresh'] ?? true, // TODO - keep also for Bar Navigation?
       );
     }).toList();
     return AppConfig(

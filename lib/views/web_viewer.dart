@@ -179,6 +179,12 @@ class _WebViewerState extends State<WebViewer> {
           actions: widget.appConfig.mainNavigation,
           activeTab: activePage,
           onChange: (index) {
+            //Reload the page on tab change if the config says so
+            NavigationItem item = widget.appConfig.mainNavigation[index];
+            if(item.refresh) {
+              collection[index].controller!.loadUrl(
+                  urlRequest: URLRequest(url: WebUri(item.value)));
+            }
             setState(() {
               activePage = index;
             });
