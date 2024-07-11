@@ -151,7 +151,8 @@ class _WebViewerState extends State<WebViewer> {
           onOpenDrawer: () => _scaffoldKey.currentState!.openDrawer(),
         ) : null,
         body: SafeArea(
-          top: widget.appConfig.template == Template.blank,
+          // top: widget.appConfig.template == Template.blank,
+          top: widget.appConfig.template == Template.blank || widget.appConfig.template == Template.tabs,
           child: !isOffline ? IndexedStack(
             index: activePage,
             children: [
