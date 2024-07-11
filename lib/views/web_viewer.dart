@@ -139,7 +139,7 @@ class _WebViewerState extends State<WebViewer> {
       child: Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: true,
-        appBar: widget.appConfig.template != Template.blank ? Navbar(
+        appBar: widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.bar ? Navbar(
           background: widget.appConfig.color,
           isDark: widget.appConfig.isDark,
           title: widget.appConfig.displayTitle ? collection[activePage].title : widget.appConfig.appName,
