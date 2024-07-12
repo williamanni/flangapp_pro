@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io' show Platform;
 
 import 'package:flangapp_pro/services/hex_color.dart';
@@ -13,13 +14,15 @@ class AppTabs extends StatefulWidget {
   final int activeTab;
   final Function onChange;
   final String color;
+  final String currentPageUrl;
 
   const AppTabs({
     super.key,
     required this.actions,
     required this.activeTab,
     required this.onChange,
-    required this.color
+    required this.color,
+    required this.currentPageUrl,
   });
 
   @override
@@ -32,9 +35,14 @@ class _AppTabsState extends State<AppTabs> {
   @override
   Widget build(BuildContext context) {
     final List<NavigationItem> items = widget.actions;
+
+    // Check if the current page displayed is also in the bottom bar menu and get the index of that page in order to highlight or not the bottom menu item
+    int highlighedIndex = items.indexWhere((item) => item.value == widget.currentPageUrl);
+    bool showHighlighedTab = highlighedIndex >= 0;
+
     return !Platform.isIOS ? BottomNavigationBar(
       currentIndex: widget.activeTab,
-      selectedItemColor: HexColor.fromHex(widget.color),
+      selectedItemColor: showHighlighedTab ? HexColor.fromHex(widget.color) : Colors.grey.shade600,
       showUnselectedLabels: true,
       showSelectedLabels: true,
       type: BottomNavigationBarType.fixed,
@@ -61,7 +69,7 @@ class _AppTabsState extends State<AppTabs> {
       ],
       currentIndex: widget.activeTab,
       iconSize: 26,
-      activeColor:  HexColor.fromHex(widget.color),
+      activeColor: showHighlighedTab ? HexColor.fromHex(widget.color) : Colors.grey.shade600,
       inactiveColor: Colors.grey.shade600,
       onTap: (int index) => widget.onChange(index),
     );

@@ -57,6 +57,7 @@ class _WebViewerState extends State<WebViewer> {
   bool showNavigation = false;
   late HttpServer server;
   bool loggedIn = false;
+  String currentPageUrl = '';
 
   final urlController = TextEditingController();
 
@@ -179,6 +180,7 @@ class _WebViewerState extends State<WebViewer> {
           actions: widget.appConfig.mainNavigation,
           activeTab: activePage,
           onChange: (index) {
+
             //Reload the page on tab change if the config says so
             NavigationItem item = widget.appConfig.mainNavigation[index];
             if(item.refresh) {
@@ -186,10 +188,15 @@ class _WebViewerState extends State<WebViewer> {
                   urlRequest: URLRequest(url: WebUri(item.value)));
             }
             setState(() {
+              // Update bottom bar active page index
               activePage = index;
+
+              // Update current page url used in the app_tabs to highlight or not the bottom menu item
+              currentPageUrl = item.value;
             });
           },
           color: widget.appConfig.activeColor,
+          currentPageUrl: currentPageUrl,
         ) : null,
       ),
     );
@@ -251,6 +258,29 @@ class _WebViewerState extends State<WebViewer> {
             });
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
+
+            // Check if the page we are navigating to is also in the bottom bar menu and get the index of that page
+            List<NavigationItem> items = widget.appConfig.mainNavigation;
+            int highlighedIndex = items.indexWhere((item) => item.value == navigationAction.request.url.toString());
+
+            setState(() {
+
+              // Update current page url used in the app_tabs to highlight or not the bottom menu item
+              currentPageUrl = navigationAction.request.url.toString();
+
+              if(highlighedIndex >= 0 && highlighedIndex < items.length) {
+                // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
+                activePage = highlighedIndex;
+
+                // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
+                NavigationItem item = widget.appConfig.mainNavigation[activePage];
+                if(item.refresh) {
+                  collection[activePage].controller!.loadUrl(
+                      urlRequest: URLRequest(url: WebUri(item.value)));
+                }
+              }
+            });
+
             if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
               final shouldPerformDownload =
                   navigationAction.shouldPerformDownload ?? false;
