@@ -261,6 +261,11 @@ class _WebViewerState extends State<WebViewer> {
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
 
+            // On Android the shouldOverrideUrlLoading callback is not called as many times as on iOS, so this condition is not required
+            if (defaultTargetPlatform == TargetPlatform.android) {
+              currentItem.isInit = true;
+            }
+
             if(currentItem.isInit == true) {
               // Check if the page we are navigating to is also in the bottom bar menu and get the index of that page
               List<NavigationItem> items = widget.appConfig.mainNavigation;
