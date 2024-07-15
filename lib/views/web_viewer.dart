@@ -58,6 +58,7 @@ class _WebViewerState extends State<WebViewer> {
   late HttpServer server;
   bool loggedIn = false;
   String currentPageUrl = '';
+  String oldPageUrl = '';
 
   final urlController = TextEditingController();
 
@@ -191,6 +192,7 @@ class _WebViewerState extends State<WebViewer> {
               // Update bottom bar active page index
               activePage = index;
 
+              oldPageUrl = currentPageUrl;
               // Update current page url used in the app_tabs to highlight or not the bottom menu item
               currentPageUrl = item.value;
             });
@@ -259,27 +261,33 @@ class _WebViewerState extends State<WebViewer> {
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
 
-            // Check if the page we are navigating to is also in the bottom bar menu and get the index of that page
-            List<NavigationItem> items = widget.appConfig.mainNavigation;
-            int highlighedIndex = items.indexWhere((item) => item.value == navigationAction.request.url.toString());
+            if(currentItem.isInit == true) {
+              // Check if the page we are navigating to is also in the bottom bar menu and get the index of that page
+              List<NavigationItem> items = widget.appConfig.mainNavigation;
+              int highlightedIndex = items.indexWhere((item) => item.value == navigationAction.request.url.toString());
 
-            setState(() {
+              setState(() {
 
-              // Update current page url used in the app_tabs to highlight or not the bottom menu item
-              currentPageUrl = navigationAction.request.url.toString();
+                oldPageUrl = currentPageUrl;
+                // Update current page url used in the app_tabs to highlight or not the bottom menu item
+                currentPageUrl = navigationAction.request.url.toString();
 
-              if(highlighedIndex >= 0 && highlighedIndex < items.length) {
-                // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
-                activePage = highlighedIndex;
+                if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+                  // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
+                  activePage = highlightedIndex;
 
-                // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
-                NavigationItem item = widget.appConfig.mainNavigation[activePage];
-                if(item.refresh) {
-                  collection[activePage].controller!.loadUrl(
-                      urlRequest: URLRequest(url: WebUri(item.value)));
+                  // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
+                  NavigationItem item = widget.appConfig.mainNavigation[activePage];
+                  // if (item.refresh && item.value != currentPageUrl) {
+                  if (item.refresh && oldPageUrl != currentPageUrl) {
+                    collection[activePage].controller!.loadUrl(
+                        urlRequest: URLRequest(url: WebUri(item.value)));
+                  }
                 }
-              }
-            });
+              });
+            } else {
+              currentItem.isInit = true;
+            }
 
             if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
               final shouldPerformDownload =
@@ -405,7 +413,8 @@ class _WebViewerState extends State<WebViewer> {
                   title: widget.appConfig.appName,
                   isCanBack: false,
                   progress: 0,
-                  isError: false
+                  isError: false,
+                  isInit: false,
               ));
         }
       }
@@ -431,7 +440,8 @@ class _WebViewerState extends State<WebViewer> {
                 title: widget.appConfig.appName,
                 isCanBack: false,
                 progress: 0,
-                isError: false
+                isError: false,
+                isInit: false,
             )
       ];
       //showNavigation = widget.appConfig.showNavigationAfterLogin; // TODO - implement showNavigationAfterLogin logic
@@ -443,7 +453,8 @@ class _WebViewerState extends State<WebViewer> {
           title: widget.appConfig.appName,
           isCanBack: false,
           progress: 0,
-          isError: false
+          isError: false,
+          isInit: false,
         )
       ];
       //showNavigation = widget.appConfig.showNavigationAfterLogin;

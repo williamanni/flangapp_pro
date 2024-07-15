@@ -9,6 +9,7 @@ class WebViewCollection {
   late bool isCanBack;
   late double progress;
   late bool isError;
+  late bool isInit;
 
   WebViewCollection({
     this.controller,
@@ -18,7 +19,8 @@ class WebViewCollection {
     required this.title,
     required this.isCanBack,
     required this.progress,
-    required this.isError
+    required this.isError,
+    required this.isInit
   });
 
 }
