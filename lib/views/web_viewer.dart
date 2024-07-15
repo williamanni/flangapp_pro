@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flangapp_pro/models/app_config.dart';
@@ -53,11 +54,17 @@ class _WebViewerState extends State<WebViewer> {
   int activePage = 0;
   bool isOffline = false;
   StreamSubscription<ConnectivityResult>? subscription;
+  bool showNavigation = false;
+  late HttpServer server;
+  bool loggedIn = false;
+  String currentPageUrl = '';
+  String oldPageUrl = '';
 
   final urlController = TextEditingController();
 
   @override
   void initState() {
+    settings.userAgent = widget.appConfig.customUserAgent;
     createCollection();
     createPullToRefresh();
     if (Config.oneSignalPushId.isNotEmpty) {
@@ -67,6 +74,8 @@ class _WebViewerState extends State<WebViewer> {
     }
 
     super.initState();
+
+    startServer();
 
     subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
@@ -85,6 +94,7 @@ class _WebViewerState extends State<WebViewer> {
   dispose() {
     subscription?.cancel();
     super.dispose();
+    server.close();
   }
 
   @override
@@ -131,19 +141,20 @@ class _WebViewerState extends State<WebViewer> {
       child: Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: true,
-        appBar: widget.appConfig.template != Template.blank ? Navbar(
+        appBar: widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.bar ? Navbar(
           background: widget.appConfig.color,
           isDark: widget.appConfig.isDark,
           title: widget.appConfig.displayTitle ? collection[activePage].title : widget.appConfig.appName,
           isCanBack: collection[activePage].isCanBack,
-          isDrawer: widget.appConfig.template == Template.drawer,
+          isDrawer: widget.appConfig.template == Template.drawerBar,
           actions: widget.appConfig.barNavigation,
           onBack: () => collection[activePage].controller?.goBack(),
           onAction: (NavigationItem item) => navigationAction(item),
           onOpenDrawer: () => _scaffoldKey.currentState!.openDrawer(),
         ) : null,
         body: SafeArea(
-          top: widget.appConfig.template == Template.blank,
+          // top: widget.appConfig.template == Template.blank,
+          top: widget.appConfig.template == Template.blank || widget.appConfig.template == Template.tabs,
           child: !isOffline ? IndexedStack(
             index: activePage,
             children: [
@@ -152,7 +163,7 @@ class _WebViewerState extends State<WebViewer> {
             ],
           ) : OfflinePage(),
         ),
-        drawer: widget.appConfig.template == Template.drawer ? AppDrawer(
+        drawer: widget.appConfig.template == Template.drawerBar ? AppDrawer(
           title: widget.appConfig.drawerTitle,
           subtitle: widget.appConfig.drawerSubtitle,
           backgroundMode: widget.appConfig.drawerBackgroundMode,
@@ -166,56 +177,76 @@ class _WebViewerState extends State<WebViewer> {
           onAction: (NavigationItem item) => navigationAction(item),
         ) : null,
         drawerEdgeDragWidth: 0,
-        bottomNavigationBar: widget.appConfig.template == Template.tabs ? AppTabs(
+        bottomNavigationBar: showNavigation == true && (widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) ? AppTabs(
           actions: widget.appConfig.mainNavigation,
           activeTab: activePage,
           onChange: (index) {
+
+            //Reload the page on tab change if the config says so
+            NavigationItem item = widget.appConfig.mainNavigation[index];
+            if(item.refresh) {
+              collection[index].controller!.loadUrl(
+                  urlRequest: URLRequest(url: WebUri(item.value)));
+            }
             setState(() {
+              // Update bottom bar active page index
               activePage = index;
+
+              oldPageUrl = currentPageUrl;
+              // Update current page url used in the app_tabs to highlight or not the bottom menu item
+              currentPageUrl = item.value;
             });
           },
           color: widget.appConfig.activeColor,
+          currentPageUrl: currentPageUrl,
         ) : null,
       ),
     );
   }
 
   Widget webContainer(int index) {
+
+    WebViewCollection currentItem = collection[index];
     return Stack(
       children: [
         InAppWebView(
-          initialUrlRequest: URLRequest(url: WebUri(collection[index].url)),
+          initialUrlRequest: URLRequest(url: WebUri(currentItem.url)),
           initialSettings: settings,
           pullToRefreshController: widget.appConfig.pullToRefreshEnabled
-              ? collection[index].pullToRefreshController
+              ? currentItem.pullToRefreshController
               : null,
           onWebViewCreated: (controller) {
-            collection[index].controller = controller;
+            currentItem.controller = controller;
+          },
+          onReceivedServerTrustAuthRequest: (controller, challenge) async {
+            //Do some checks here to decide if CANCELS or PROCEEDS
+            return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
           },
           onProgressChanged: (controller, progress) {
-            injectCss(index);
+
+            injectCss(currentItem);
             if (progress == 100) {
-              collection[index].pullToRefreshController?.endRefreshing();
+              currentItem.pullToRefreshController?.endRefreshing();
             }
             setState(() {
-              collection[index].progress = progress / 100;
+              currentItem.progress = progress / 100;
             });
             controller.getTitle().then((value) {
               if (value != null) {
                 setState(() {
-                  collection[index].title = value;
+                  currentItem.title = value;
                 });
               }
             });
           },
           onLoadStop: (controller, url) async {
-            collection[index].pullToRefreshController?.endRefreshing();
+            currentItem.pullToRefreshController?.endRefreshing();
             setState(() {
-              collection[index].progress = 1;
+              currentItem.progress = 1;
             });
             controller.canGoBack().then((value) {
               setState(() {
-                collection[index].isCanBack = value;
+                currentItem.isCanBack = value;
               });
             });
           },
@@ -224,11 +255,45 @@ class _WebViewerState extends State<WebViewer> {
             controller.canGoBack().then((value) {
               debugPrint("NEW VALUE $value");
               setState(() {
-                collection[index].isCanBack = value;
+                currentItem.isCanBack = value;
               });
             });
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
+
+            // On Android the shouldOverrideUrlLoading callback is not called as many times as on iOS, so this condition is not required
+            if (defaultTargetPlatform == TargetPlatform.android) {
+              currentItem.isInit = true;
+            }
+
+            if(currentItem.isInit == true) {
+              // Check if the page we are navigating to is also in the bottom bar menu and get the index of that page
+              List<NavigationItem> items = widget.appConfig.mainNavigation;
+              int highlightedIndex = items.indexWhere((item) => item.value == navigationAction.request.url.toString());
+
+              setState(() {
+
+                oldPageUrl = currentPageUrl;
+                // Update current page url used in the app_tabs to highlight or not the bottom menu item
+                currentPageUrl = navigationAction.request.url.toString();
+
+                if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+                  // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
+                  activePage = highlightedIndex;
+
+                  // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
+                  NavigationItem item = widget.appConfig.mainNavigation[activePage];
+                  // if (item.refresh && item.value != currentPageUrl) {
+                  if (item.refresh && oldPageUrl != currentPageUrl) {
+                    collection[activePage].controller!.loadUrl(
+                        urlRequest: URLRequest(url: WebUri(item.value)));
+                  }
+                }
+              });
+            } else {
+              currentItem.isInit = true;
+            }
+
             if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
               final shouldPerformDownload =
                   navigationAction.shouldPerformDownload ?? false;
@@ -290,7 +355,7 @@ class _WebViewerState extends State<WebViewer> {
             launchUrl(Uri.parse(downloadStartRequest.url.toString()), mode: LaunchMode.externalApplication);
           },
           onReceivedHttpError: (controller, request, errorResponse) async {
-            collection[index].pullToRefreshController?.endRefreshing();
+            currentItem.pullToRefreshController?.endRefreshing();
             var isForMainFrame = request.isForMainFrame ?? false;
             if (!isForMainFrame) {
               return;
@@ -302,7 +367,7 @@ class _WebViewerState extends State<WebViewer> {
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
           },
           onReceivedError: (controller, request, error) async {
-            collection[index].pullToRefreshController?.endRefreshing();
+            currentItem.pullToRefreshController?.endRefreshing();
             var isForMainFrame = request.isForMainFrame ?? false;
             if (!isForMainFrame ||
                 (!kIsWeb &&
@@ -311,22 +376,22 @@ class _WebViewerState extends State<WebViewer> {
               return;
             }
             setState(() {
-              collection[index].isError = true;
+              currentItem.isError = true;
             });
           }
         ),
-        if (collection[index].progress < 1 && widget.appConfig.indicator != LoadIndicator.none)
+        if (currentItem.progress < 1 && widget.appConfig.indicator != LoadIndicator.none)
           ProgressLoad(
-              value: collection[index].progress,
+              value: currentItem.progress,
               color: widget.appConfig.indicatorColor,
               type: widget.appConfig.indicator
           ),
-        if (collection[index].isError)
+        if (currentItem.isError)
           ErrorPage(
               onBack: () {
                 setState(() {
                   collection[activePage].controller?.goBack();
-                  collection[index].isError = false;
+                  currentItem.isError = false;
                 });
               },
               color: widget.appConfig.color,
@@ -340,21 +405,51 @@ class _WebViewerState extends State<WebViewer> {
     );
   }
 
-  void createCollection() {
-    if (widget.appConfig.template == Template.tabs && widget.appConfig.mainNavigation.length > 1) {
+  void addRestOfCollectionItems() {
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.length > 1) {
       List<NavigationItem> items = widget.appConfig.mainNavigation;
+
+      for (var i = 1; i < items.length; i ++) {
+        if (items[i].type == ActionType.internal) {
+          collection.add(
+              WebViewCollection(
+                  url: items[i].value.toString(),
+                  isLoading: true,
+                  title: widget.appConfig.appName,
+                  isCanBack: false,
+                  progress: 0,
+                  isError: false,
+                  isInit: false,
+              ));
+        }
+      }
+    }
+  }
+
+  void removeRestOfCollectionItems() async {
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && collection.length > 1) {
+      // Leave only the first page
+      collection.removeRange(1, collection.length);
+    }
+  }
+
+  void createCollection() {
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.isNotEmpty) {
+      List<NavigationItem> items = widget.appConfig.mainNavigation;
+
       collection = [
-        for (var i = 0; i < items.length; i ++)
-          if (items[i].type == ActionType.internal)
+          if (items[0].type == ActionType.internal)
             WebViewCollection(
-              url: items[i].value.toString(),
-              isLoading: true,
-              title: widget.appConfig.appName,
-              isCanBack: false,
-              progress: 0,
-              isError: false
+                url: items[0].value.toString(),
+                isLoading: true,
+                title: widget.appConfig.appName,
+                isCanBack: false,
+                progress: 0,
+                isError: false,
+                isInit: false,
             )
       ];
+      //showNavigation = widget.appConfig.showNavigationAfterLogin; // TODO - implement showNavigationAfterLogin logic
     } else {
       collection = [
         WebViewCollection(
@@ -363,14 +458,41 @@ class _WebViewerState extends State<WebViewer> {
           title: widget.appConfig.appName,
           isCanBack: false,
           progress: 0,
-          isError: false
+          isError: false,
+          isInit: false,
         )
       ];
+      //showNavigation = widget.appConfig.showNavigationAfterLogin;
+    }
+  }
+
+  void addRestOfPullToRefreshItems() {
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.length > 1) {
+      List<NavigationItem> items = widget.appConfig.mainNavigation;
+      for (var i = 1; i < items.length; i ++) {
+        if (items[i].type == ActionType.internal) {
+          collection[i].pullToRefreshController = PullToRefreshController(
+            settings: PullToRefreshSettings(
+              color: Colors.grey,
+            ),
+            onRefresh: () async {
+              if (defaultTargetPlatform == TargetPlatform.android) {
+                collection[i].controller?.reload();
+              } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+                collection[i].controller?.loadUrl(
+                    urlRequest:
+                    URLRequest(url: await collection[i].controller?.getUrl()));
+              }
+            },
+          );
+        }
+      }
     }
   }
 
   void createPullToRefresh() {
-    if (widget.appConfig.template != Template.tabs) {
+    if (widget.appConfig.template != Template.tabsBar &&
+        widget.appConfig.template != Template.tabs) {
       collection[0].pullToRefreshController = PullToRefreshController(
         settings: PullToRefreshSettings(
           color: Colors.grey,
@@ -388,32 +510,31 @@ class _WebViewerState extends State<WebViewer> {
       return;
     }
     List<NavigationItem> items = widget.appConfig.mainNavigation;
-    for (var i = 0; i < items.length; i ++) {
-      if (items[i].type == ActionType.internal) {
-        collection[i].pullToRefreshController = PullToRefreshController(
-          settings: PullToRefreshSettings(
-            color: Colors.grey,
-          ),
-          onRefresh: () async {
-            if (defaultTargetPlatform == TargetPlatform.android) {
-              collection[i].controller?.reload();
-            } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-              collection[i].controller?.loadUrl(
-                  urlRequest:
-                  URLRequest(url: await collection[i].controller?.getUrl()));
-            }
-          },
-        );
-      }
+
+    if (items.isNotEmpty && items[0].type == ActionType.internal) {
+      collection[0].pullToRefreshController = PullToRefreshController(
+        settings: PullToRefreshSettings(
+          color: Colors.grey,
+        ),
+        onRefresh: () async {
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            collection[0].controller?.reload();
+          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+            collection[0].controller?.loadUrl(
+                urlRequest:
+                URLRequest(url: await collection[0].controller?.getUrl()));
+          }
+        },
+      );
     }
   }
 
-  void injectCss(index) {
+  void injectCss(WebViewCollection item) {
     String styles = "";
     for (var item in widget.appConfig.cssHideBlock) {
       styles = "$styles$item{ display: none; }";
     }
-    collection[index].controller?.injectCSSCode(
+    item.controller?.injectCSSCode(
         source: styles
     );
   }
@@ -455,5 +576,57 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
+  startServer() async {
+    try {
+      ByteData chain = await rootBundle.load('assets/certificates/domain.crt');
+      ByteData key = await rootBundle.load('assets/certificates/domain.key');
 
+      var securityContext = SecurityContext();
+      securityContext.useCertificateChainBytes(chain.buffer.asUint8List());
+      securityContext.usePrivateKeyBytes(key.buffer.asUint8List());
+
+      server = await HttpServer.bindSecure(
+          InternetAddress.anyIPv6, 4200, securityContext);
+
+      await for (var request in server) {
+        String url = request.uri.toString();
+        if (url.contains('auth')) {
+          String? userId = request.uri.queryParameters['id'];
+
+          if (userId == null || userId.isEmpty) {
+
+            // Logout
+            if(loggedIn == true) {
+
+              //Reload first page to show the login page because the user can log out from different page
+              List<NavigationItem> items = widget.appConfig.mainNavigation;
+              collection[0].controller!.loadUrl(urlRequest: URLRequest(url: WebUri(items[0].value)));
+
+              // hide navigation tabs
+              setState(() {
+                activePage = 0;
+                showNavigation = false;
+                removeRestOfCollectionItems();
+              });
+
+              loggedIn = false;
+            }
+          } else {
+            // Login
+            setState(() {
+              if (loggedIn == false) {
+                addRestOfCollectionItems();
+                addRestOfPullToRefreshItems();
+                showNavigation = true;
+                loggedIn = true;
+              }
+            });
+          }
+        }
+      }
+    }
+    catch (exception, stacktrace) {
+      debugPrint(exception.toString());
+    }
+  }
 }

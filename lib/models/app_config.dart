@@ -15,6 +15,7 @@ class AppConfig {
   final String iconColor;
   final bool isDark;
   final bool pullToRefreshEnabled;
+  final bool showNavigationAfterLogin;
   final String customUserAgent;
   final String email;
   final Template template;
@@ -57,6 +58,7 @@ class AppConfig {
     required this.iconColor,
     required this.isDark,
     required this.pullToRefreshEnabled,
+    required this.showNavigationAfterLogin,
     required this.customUserAgent,
     required this.email,
     required this.template,
@@ -94,6 +96,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['value'],
+        refresh: itemJson['refresh'] ?? true, // TODO - update with the correct field after BE work is done
       );
     }).toList();
     List<dynamic> navigationItemsJsonBar = json['navigation']['bar'];
@@ -103,6 +106,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['value'],
+        refresh: itemJson['refresh'] ?? true, // TODO - keep also for Bar Navigation?
       );
     }).toList();
     return AppConfig(
@@ -114,6 +118,7 @@ class AppConfig {
       iconColor: json['icon_color'],
       isDark: json['is_dark'],
       pullToRefreshEnabled: json['pull_to_refresh'],
+      showNavigationAfterLogin: json['show_navigation_after_login'],
       customUserAgent: json['user_agent'],
       email: json['email'],
       template: _convertToTemplate(json['template']),
@@ -147,12 +152,14 @@ class AppConfig {
   static Template _convertToTemplate(int value) {
     switch (value) {
       case 0:
-        return Template.drawer;
+        return Template.drawerBar;
       case 1:
-        return Template.tabs;
+        return Template.tabsBar;
       case 2:
         return Template.bar;
       case 3:
+        return Template.tabs;
+      case 4:
         return Template.blank;
       default:
         throw Exception('Unknown template value: $value');
