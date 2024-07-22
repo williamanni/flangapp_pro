@@ -64,7 +64,9 @@
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>use user location</string>
 
-    
+    <key>NSCameraUsageDescription</key>
+<string>picture upload for event</string>
+
     
 </dict>
 </plist>
