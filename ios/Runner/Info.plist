@@ -5,7 +5,7 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>App Petite</string>
 	<key>CFBundleExecutable</key>
@@ -36,37 +36,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string><key>NSCameraUsageDescription</key>
-<string>picture upload for event</string>
-</string>
+	<string>picture upload for event</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-</string>
+	<string>use user location</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-</string>
+	<string>use user location</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -80,16 +54,18 @@
 	<key>UIRequiresFullScreen</key>
 	<true/>
 	<key>UISupportedInterfaceOrientations</key>
-	<array><array><string>UIInterfaceOrientationPortrait</string>
-<string>UIInterfaceOrientationPortraitUpsideDown</string>
-<string>UIInterfaceOrientationLandscapeLeft</string>
-<string>UIInterfaceOrientationLandscapeRight</string>
-</array></array>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array><array><string>UIInterfaceOrientationPortrait</string>
-<string>UIInterfaceOrientationPortraitUpsideDown</string>
-<string>UIInterfaceOrientationLandscapeLeft</string>
-<string>UIInterfaceOrientationLandscapeRight</string>
-</array></array>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 </dict>
 </plist>
