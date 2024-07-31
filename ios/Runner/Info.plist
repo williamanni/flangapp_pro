@@ -38,7 +38,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string><key>NSCameraUsageDescription</key>
 <string><key>NSCameraUsageDescription</key>
-<string>picture upload for event</string>
+<string>&lt;key&gt;NSCameraUsageDescription&lt;/key&gt;
+&lt;string&gt;picture upload for event&lt;/string&gt;
+</string>
 </string>
 </string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -48,57 +50,89 @@
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
 </string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>use user location</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
+</string>
+<key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
+</string>
+</string>
+</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
+</string>
+</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
 </string>
 </string>
 </string>
@@ -110,57 +144,89 @@
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
-</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
 </string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>use user location</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
+</string>
+<key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
+</string>
+</string>
+</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+</string>
+</string>
+</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
 </string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>use user location</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
+<string>&lt;key&gt;NSLocationAlwaysAndWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
+&lt;key&gt;NSLocationWhenInUseUsageDescription&lt;/key&gt;
+&lt;string&gt;use user location&lt;/string&gt;
 </string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string><key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>use user location</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>use user location</string>
 </string>
 </string>
 </string>
