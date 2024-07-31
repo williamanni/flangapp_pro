@@ -71,7 +71,6 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - onesignal_flutter (from `.symlinks/plugins/onesignal_flutter/ios`)
-  - OneSignalXCFramework (< 6.0, >= 5.0.0)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -114,6 +113,6 @@ SPEC CHECKSUMS:
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
   url_launcher_ios: bbd758c6e7f9fd7b5b1d4cde34d2b95fcce5e812
 
-PODFILE CHECKSUM: 119d0a5d62f995898c8244b596ba6269284eeaa8
+PODFILE CHECKSUM: 20a55e50a9a28a9ef8bf25dcc3fb86323b85c491
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.15.2
