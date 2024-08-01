@@ -18,6 +18,8 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' show Platform;
+
 
 import '../config/config.dart';
 import '../models/enum/action_type.dart';
@@ -60,6 +62,7 @@ class _WebViewerState extends State<WebViewer> {
   String currentPageUrl = '';
   String oldPageUrl = '';
   bool isPageLoadingInProgress = false;
+  String platform = '';
 
   final urlController = TextEditingController();
 
@@ -89,6 +92,22 @@ class _WebViewerState extends State<WebViewer> {
         });
       }
     });
+
+    if (Platform.isAndroid) {
+      platform = 'Android';
+    } else if (Platform.isIOS) {
+      platform = 'iOS';
+    } else if (Platform.isMacOS) {
+      platform = 'MacOS';
+    } else if (Platform.isWindows) {
+      platform = 'Windows';
+    } else if (Platform.isLinux) {
+      platform = 'Linux';
+    } else if (Platform.isFuchsia) {
+      platform = 'Fuchsia';
+    } else {
+      platform = 'Unknown';
+    }
   }
 
   @override
@@ -224,7 +243,22 @@ class _WebViewerState extends State<WebViewer> {
                     ? currentItem.pullToRefreshController
                     : null,
                 onWebViewCreated: (controller) {
+
                   currentItem.controller = controller;
+
+                  controller.addJavaScriptHandler(handlerName: 'pushNotificationsHandler', callback: (args) async {
+
+                    String? pushId = OneSignal.User.pushSubscription.id;
+                    String? pushToken = OneSignal.User.pushSubscription.token;
+
+                    // String? oneSignalId = await OneSignal.User.getOnesignalId();
+                    // String? externalId = await OneSignal.User.getExternalId();
+
+                    // return data to the JavaScript side!
+                    return {
+                      'appId': Config.appUid, 'pushToken': pushToken, 'oneSignalUserId': pushId, 'platform': platform
+                    };
+                  });
                 },
                 onReceivedServerTrustAuthRequest: (controller, challenge) async {
                   //Do some checks here to decide if CANCELS or PROCEEDS
