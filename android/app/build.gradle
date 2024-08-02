@@ -56,9 +56,9 @@ android {
     signingConfigs {
         release {
             storeFile file("sign/key.jks")
-            storePassword "EMrNEJbNkbPs"
-            keyAlias "tadapp_android_e"
-            keyPassword "EMrNEJbNkbPs"
+            storePassword "biesse"
+            keyAlias "appbuilder"
+            keyPassword "biesse"
         }
     }
 
