@@ -7,7 +7,6 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_inappwebview_macos-1.0.11" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/onesignal_flutter-5.2.2" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus-10.0.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_inappwebview-6.0.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.0" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/url_launcher_linux-3.1.1" />
@@ -23,6 +22,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider-2.1.4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_android-2.2.4" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/connectivity_plus-5.0.2" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus-7.2.2" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
