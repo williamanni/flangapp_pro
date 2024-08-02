@@ -20,7 +20,7 @@ workflows:
           find . -name "Podfile" -execdir pod install \;
       - name: Build APK with Flutter
         script: |
-          cd . && flutter build apk --release --no-tree-shake-icons --build-name=1.0.49 --build-number=$(($(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks="$GOOGLE_PLAY_TRACK") + 1))
+          cd . && flutter build apk --release --no-tree-shake-icons --build-name=1.0.50 --build-number=$(($(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks="$GOOGLE_PLAY_TRACK") + 1))
     artifacts:
       - build/**/outputs/**/*.apk
       - build/**/outputs/**/*.aab
@@ -30,4 +30,4 @@ workflows:
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=652927d1-2a41-7a5a-745e-6169e7ef37ac
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=7738bf9a-0d02-2d2d-6164-069f86d95297
