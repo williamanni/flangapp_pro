@@ -55,7 +55,7 @@ class _WebViewerState extends State<WebViewer> {
   List<WebViewCollection> collection = [];
   int activePage = 0;
   bool isOffline = false;
-  StreamSubscription<List<ConnectivityResult>>? subscription;
+  StreamSubscription<ConnectivityResult>? subscription;
   bool showNavigation = false;
   late HttpServer server;
   bool loggedIn = false;
@@ -81,8 +81,8 @@ class _WebViewerState extends State<WebViewer> {
 
     startServer();
 
-    subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
-        if (result.contains(ConnectivityResult.mobile) == false && result.contains(ConnectivityResult.wifi) == false) {
+    subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+        if (result == ConnectivityResult.none) {
         setState(() {
           isOffline = true;
         });
