@@ -10,46 +10,51 @@ PODS:
   - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 5.0)
-  - onesignal_flutter (5.1.0):
+  - onesignal_flutter (5.2.2):
     - Flutter
-    - OneSignalXCFramework (= 5.1.0)
-  - OneSignalXCFramework (5.1.0):
-    - OneSignalXCFramework/OneSignalComplete (= 5.1.0)
-  - OneSignalXCFramework/OneSignal (5.1.0):
+    - OneSignalXCFramework (= 5.2.2)
+  - OneSignalXCFramework (5.2.2):
+    - OneSignalXCFramework/OneSignalComplete (= 5.2.2)
+  - OneSignalXCFramework/OneSignal (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalExtension
+    - OneSignalXCFramework/OneSignalLiveActivities
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalComplete (5.1.0):
+  - OneSignalXCFramework/OneSignalComplete (5.2.2):
     - OneSignalXCFramework/OneSignal
     - OneSignalXCFramework/OneSignalInAppMessages
     - OneSignalXCFramework/OneSignalLocation
-  - OneSignalXCFramework/OneSignalCore (5.1.0)
-  - OneSignalXCFramework/OneSignalExtension (5.1.0):
+  - OneSignalXCFramework/OneSignalCore (5.2.2)
+  - OneSignalXCFramework/OneSignalExtension (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalInAppMessages (5.1.0):
+  - OneSignalXCFramework/OneSignalInAppMessages (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalLocation (5.1.0):
+  - OneSignalXCFramework/OneSignalLiveActivities (5.2.2):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalOSCore
+    - OneSignalXCFramework/OneSignalUser
+  - OneSignalXCFramework/OneSignalLocation (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalNotifications (5.1.0):
+  - OneSignalXCFramework/OneSignalNotifications (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalExtension
     - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalOSCore (5.1.0):
+  - OneSignalXCFramework/OneSignalOSCore (5.2.2):
     - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalOutcomes (5.1.0):
+  - OneSignalXCFramework/OneSignalOutcomes (5.2.2):
     - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalUser (5.1.0):
+  - OneSignalXCFramework/OneSignalUser (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
@@ -60,7 +65,7 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.3.0):
     - Flutter
-  - ReachabilitySwift (5.0.0)
+  - ReachabilitySwift (5.2.3)
   - share_plus (0.0.1):
     - Flutter
   - url_launcher_ios (0.0.1):
@@ -104,15 +109,15 @@ SPEC CHECKSUMS:
   connectivity_plus: bf0076dd84a130856aa636df1c71ccaff908fa1d
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_inappwebview_ios: 97215cf7d4677db55df76782dbd2930c5e1c1ea0
-  onesignal_flutter: 419a224915bbc03181d176a3cb507a88e64af92f
-  OneSignalXCFramework: 72a6dbc5d97b7eba09a51837f7858d8957ac2629
+  onesignal_flutter: c64704854df3c77f5e8b464abc15b65c8c74001a
+  OneSignalXCFramework: f06edd9b146c7ac5935136a117ce2a5fdd6420f6
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
-  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  permission_handler_apple: 036b856153a2b1f61f21030ff725f3e6fece2b78
-  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
-  share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
-  url_launcher_ios: bbd758c6e7f9fd7b5b1d4cde34d2b95fcce5e812
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
+  ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
+  share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
+  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
 
-PODFILE CHECKSUM: 82b3cd38ddc14cb8d858f73155facd062267dc0d
+PODFILE CHECKSUM: 20a55e50a9a28a9ef8bf25dcc3fb86323b85c491
 
 COCOAPODS: 1.15.2
