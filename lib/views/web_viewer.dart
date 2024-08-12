@@ -24,8 +24,10 @@ import 'dart:io' show Platform;
 import '../config/config.dart';
 import '../models/enum/action_type.dart';
 import '../models/enum/load_indicator.dart';
+import '../models/enum/notification_type.dart';
 import '../models/enum/template.dart';
 import '../models/navigation_item.dart';
+import '../models/notification_message.dart';
 import '../models/web_view_collection.dart';
 
 class WebViewer extends StatefulWidget {
@@ -77,12 +79,8 @@ class _WebViewerState extends State<WebViewer> {
       OneSignal.initialize(Config.oneSignalPushId);
       OneSignal.Notifications.requestPermission(true);
       OneSignal.Notifications.addClickListener((event) {
-        // debugPrint("GEO-GEO-GEO-GEO-GEO-GEO - addClickListener()");
-        var additionalData = event.notification.additionalData;
-        if(additionalData != null && additionalData.containsKey('conversation_id')) {
-          String conversationId = additionalData['conversation_id'];
-          openChatPage(conversationId);
-        }
+        NotificationMessage? notification = getNotification(event.notification.additionalData);
+          openPage(notification);
       });
     }
 
@@ -271,12 +269,11 @@ class _WebViewerState extends State<WebViewer> {
 
                   controller.addJavaScriptHandler(handlerName: 'chatHandler', callback: (args) async {
 
-                    // debugPrint("GEO-GEO-GEO-GEO-GEO-GEO - chatHandler()");
                     String tempChatConversationId = chatConversationId;
                     chatConversationId = '';
                     // return data to the JavaScript side!
                     return {
-                      'conversation_id': tempChatConversationId
+                      'id': tempChatConversationId
                     };
                   });
                 },
@@ -655,7 +652,7 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
-  startServer() async {
+  void startServer() async {
     try {
       ByteData chain = await rootBundle.load('assets/certificates/domain.crt');
       ByteData key = await rootBundle.load('assets/certificates/domain.key');
@@ -712,22 +709,26 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
-  openChatPage(String conversationId) {
+  void openPage(NotificationMessage? notification) {
+
+    if(notification != null) {
 
       List<NavigationItem> items = widget.appConfig.mainNavigation;
 
-      if (items != null) {
-        int chatMenuIndex = items.indexWhere((item) => item.value.contains('inbox')); // TODO GEO - do better the hardcoded 'inbox' string
+      // If notification.url exists then we have to navigate to that page
+      if (items != null && notification.url != null) {
+        int chatMenuIndex = items.indexWhere((item) => item.value == notification.url);
 
         if (chatMenuIndex >= 0 && chatMenuIndex < items.length) {
           oldPageUrl = currentPageUrl;
           // Update current page url used in the app_tabs to highlight or not the bottom menu item
           currentPageUrl = items[chatMenuIndex].value;
 
-          chatConversationId = conversationId;
+          // Set the conversation id if is received
+          chatConversationId = notification.id != null ? notification.id! : '';
 
           setState(() {
-          // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
+            // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
             activePage = chatMenuIndex;
 
             // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
@@ -743,5 +744,29 @@ class _WebViewerState extends State<WebViewer> {
           });
         }
       }
+    }
+  }
+
+  NotificationMessage? getNotification(Map<String, dynamic>? additionalData) {
+
+    if(additionalData != null) {
+
+      NotificationType type = NotificationType.general;
+      String? url;
+      String? id;
+
+      if(additionalData.containsKey('url')) {
+        type = NotificationType.page;
+        url = additionalData['url'];
+
+        if(additionalData.containsKey('id')) {
+          type = NotificationType.chat;
+          id = additionalData['id'];
+        }
+      }
+
+      return NotificationMessage(type: type, url: url, id: id);
+    }
+    return null;
   }
 }

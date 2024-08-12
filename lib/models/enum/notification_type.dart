@@ -1,0 +1,1 @@
+enum NotificationType { general, page, chat }
