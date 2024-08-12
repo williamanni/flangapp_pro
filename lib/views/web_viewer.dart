@@ -24,8 +24,10 @@ import 'dart:io' show Platform;
 import '../config/config.dart';
 import '../models/enum/action_type.dart';
 import '../models/enum/load_indicator.dart';
+import '../models/enum/notification_type.dart';
 import '../models/enum/template.dart';
 import '../models/navigation_item.dart';
+import '../models/notification_message.dart';
 import '../models/web_view_collection.dart';
 
 class WebViewer extends StatefulWidget {
@@ -63,6 +65,7 @@ class _WebViewerState extends State<WebViewer> {
   String oldPageUrl = '';
   bool isPageLoadingInProgress = false;
   String platform = '';
+  String chatConversationId = '';
 
   final urlController = TextEditingController();
 
@@ -75,6 +78,10 @@ class _WebViewerState extends State<WebViewer> {
       OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
       OneSignal.initialize(Config.oneSignalPushId);
       OneSignal.Notifications.requestPermission(true);
+      OneSignal.Notifications.addClickListener((event) {
+        NotificationMessage? notification = getNotification(event.notification.additionalData);
+          openPage(notification);
+      });
     }
 
     super.initState();
@@ -259,6 +266,16 @@ class _WebViewerState extends State<WebViewer> {
                       'appId': Config.appUid, 'pushToken': pushToken, 'oneSignalUserId': pushId, 'platform': platform
                     };
                   });
+
+                  controller.addJavaScriptHandler(handlerName: 'chatHandler', callback: (args) async {
+
+                    String tempChatConversationId = chatConversationId;
+                    chatConversationId = '';
+                    // return data to the JavaScript side!
+                    return {
+                      'id': tempChatConversationId
+                    };
+                  });
                 },
                 onReceivedServerTrustAuthRequest: (controller, challenge) async {
                   //Do some checks here to decide if CANCELS or PROCEEDS
@@ -435,191 +452,6 @@ class _WebViewerState extends State<WebViewer> {
                 }
             )
         ),
-
-        // Visibility(
-        //   visible: !isPageLoadingInProgress,
-        //   child:
-        //   InAppWebView(
-        //       initialUrlRequest: URLRequest(url: WebUri(currentItem.url)),
-        //       initialSettings: settings,
-        //       pullToRefreshController: widget.appConfig.pullToRefreshEnabled
-        //           ? currentItem.pullToRefreshController
-        //           : null,
-        //       onWebViewCreated: (controller) {
-        //         currentItem.controller = controller;
-        //       },
-        //       onReceivedServerTrustAuthRequest: (controller, challenge) async {
-        //         //Do some checks here to decide if CANCELS or PROCEEDS
-        //         return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
-        //       },
-        //       onLoadStart: (controller, url) {
-        //         setState(() {
-        //           isPageLoadingInProgress = true;
-        //         });
-        //       },
-        //       onProgressChanged: (controller, progress) {
-        //
-        //         injectCss(currentItem);
-        //         if (progress == 100) {
-        //           currentItem.pullToRefreshController?.endRefreshing();
-        //           // setState(() {
-        //           //   isPageLoadingInProgress = false;
-        //           // });
-        //         }
-        //         setState(() {
-        //           currentItem.progress = progress / 100;
-        //         });
-        //         controller.getTitle().then((value) {
-        //           if (value != null) {
-        //             setState(() {
-        //               currentItem.title = value;
-        //             });
-        //           }
-        //         });
-        //       },
-        //       onLoadStop: (controller, url) async {
-        //         currentItem.pullToRefreshController?.endRefreshing();
-        //         setState(() {
-        //           currentItem.progress = 1;
-        //           isPageLoadingInProgress = false;
-        //         });
-        //         controller.canGoBack().then((value) {
-        //           setState(() {
-        //             currentItem.isCanBack = value;
-        //           });
-        //         });
-        //       },
-        //       onUpdateVisitedHistory: (controller, url, androidIsReload) {
-        //         debugPrint("UPDATE HISTORY");
-        //         controller.canGoBack().then((value) {
-        //           debugPrint("NEW VALUE $value");
-        //           setState(() {
-        //             currentItem.isCanBack = value;
-        //           });
-        //         });
-        //       },
-        //       shouldOverrideUrlLoading: (controller, navigationAction) async {
-        //
-        //         // On Android the shouldOverrideUrlLoading callback is not called as many times as on iOS, so this condition is not required
-        //         if (defaultTargetPlatform == TargetPlatform.android) {
-        //           currentItem.isInit = true;
-        //         }
-        //
-        //         if(currentItem.isInit == true) {
-        //           // Check if the page we are navigating to is also in the bottom bar menu and get the index of that page
-        //           List<NavigationItem> items = widget.appConfig.mainNavigation;
-        //           int highlightedIndex = items.indexWhere((item) => item.value == navigationAction.request.url.toString());
-        //
-        //           setState(() {
-        //
-        //             oldPageUrl = currentPageUrl;
-        //             // Update current page url used in the app_tabs to highlight or not the bottom menu item
-        //             currentPageUrl = navigationAction.request.url.toString();
-        //
-        //             if (highlightedIndex >= 0 && highlightedIndex < items.length) {
-        //               // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
-        //               activePage = highlightedIndex;
-        //
-        //               // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
-        //               NavigationItem item = widget.appConfig.mainNavigation[activePage];
-        //               // if (item.refresh && item.value != currentPageUrl) {
-        //               if (item.refresh && oldPageUrl != currentPageUrl) {
-        //                 collection[activePage].controller!.loadUrl(
-        //                     urlRequest: URLRequest(url: WebUri(item.value)));
-        //               }
-        //             }
-        //           });
-        //         } else {
-        //           currentItem.isInit = true;
-        //         }
-        //
-        //         if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-        //           final shouldPerformDownload =
-        //               navigationAction.shouldPerformDownload ?? false;
-        //           final url = navigationAction.request.url;
-        //           if (shouldPerformDownload && url != null) {
-        //             return NavigationActionPolicy.DOWNLOAD;
-        //           }
-        //         }
-        //         var uri = navigationAction.request.url!;
-        //
-        //         if (![
-        //           "http",
-        //           "https",
-        //           "file",
-        //           "chrome",
-        //           "data",
-        //           "javascript",
-        //           "about"
-        //         ].contains(uri.scheme)) {
-        //           if (await canLaunchUrl(uri)) {
-        //             // Launch the App
-        //             await launchUrl(
-        //               uri,
-        //             );
-        //             // and cancel the request
-        //             return NavigationActionPolicy.CANCEL;
-        //           }
-        //         }
-        //         return NavigationActionPolicy.ALLOW;
-        //       },
-        //       onGeolocationPermissionsShowPrompt: (InAppWebViewController controller, String origin) async {
-        //         if (widget.appConfig.gpsEnabled) {
-        //           await Permission.location.request();
-        //           return GeolocationPermissionShowPromptResponse(
-        //               origin: origin,
-        //               allow: true,
-        //               retain: true
-        //           );
-        //         }
-        //       },
-        //       onPermissionRequest: (controller, request) async {
-        //         for (var i = 0; i < request.resources.length; i ++) {
-        //           if (request.resources[i].toString().contains("MICROPHONE")) {
-        //             if (widget.appConfig.microphoneEnabled) {
-        //               await Permission.microphone.request();
-        //             }
-        //           }
-        //           if (request.resources[i].toString().contains("CAMERA")) {
-        //             if (widget.appConfig.cameraEnabled) {
-        //               await Permission.camera.request();
-        //             }
-        //           }
-        //         }
-        //         return PermissionResponse(
-        //             resources: request.resources,
-        //             action: PermissionResponseAction.GRANT);
-        //       },
-        //       onDownloadStartRequest: (controller, downloadStartRequest) async {
-        //         launchUrl(Uri.parse(downloadStartRequest.url.toString()), mode: LaunchMode.externalApplication);
-        //       },
-        //       onReceivedHttpError: (controller, request, errorResponse) async {
-        //         currentItem.pullToRefreshController?.endRefreshing();
-        //         var isForMainFrame = request.isForMainFrame ?? false;
-        //         if (!isForMainFrame) {
-        //           return;
-        //         }
-        //         final snackBar = SnackBar(
-        //           content: Text(
-        //               'HTTP: ${request.url}: ${errorResponse.statusCode} ${errorResponse.reasonPhrase ?? ''}'),
-        //         );
-        //         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        //       },
-        //       onReceivedError: (controller, request, error) async {
-        //         currentItem.pullToRefreshController?.endRefreshing();
-        //         var isForMainFrame = request.isForMainFrame ?? false;
-        //         if (!isForMainFrame ||
-        //             (!kIsWeb &&
-        //                 defaultTargetPlatform == TargetPlatform.iOS &&
-        //                 error.type == WebResourceErrorType.CANCELLED)) {
-        //           return;
-        //         }
-        //         setState(() {
-        //           currentItem.isError = true;
-        //         });
-        //       }
-        //   ),
-        // ),
 
         if (currentItem.progress < 1 && widget.appConfig.indicator != LoadIndicator.none)
           ProgressLoad(
@@ -820,7 +652,7 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
-  startServer() async {
+  void startServer() async {
     try {
       ByteData chain = await rootBundle.load('assets/certificates/domain.crt');
       ByteData key = await rootBundle.load('assets/certificates/domain.key');
@@ -875,5 +707,66 @@ class _WebViewerState extends State<WebViewer> {
     catch (exception, stacktrace) {
       debugPrint(exception.toString());
     }
+  }
+
+  void openPage(NotificationMessage? notification) {
+
+    if(notification != null) {
+
+      List<NavigationItem> items = widget.appConfig.mainNavigation;
+
+      // If notification.url exists then we have to navigate to that page
+      if (items != null && notification.url != null) {
+        int chatMenuIndex = items.indexWhere((item) => item.value == notification.url);
+
+        if (chatMenuIndex >= 0 && chatMenuIndex < items.length) {
+          oldPageUrl = currentPageUrl;
+          // Update current page url used in the app_tabs to highlight or not the bottom menu item
+          currentPageUrl = items[chatMenuIndex].value;
+
+          // Set the conversation id if is received
+          chatConversationId = notification.id != null ? notification.id! : '';
+
+          setState(() {
+            // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
+            activePage = chatMenuIndex;
+
+            // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
+            NavigationItem item = widget.appConfig.mainNavigation[activePage];
+            // if (item.refresh && item.value != currentPageUrl) {
+            if (item.refresh && oldPageUrl != currentPageUrl) {
+              setState(() {
+                isPageLoadingInProgress = true;
+              });
+              collection[activePage].controller!.loadUrl(
+                  urlRequest: URLRequest(url: WebUri(item.value)));
+            }
+          });
+        }
+      }
+    }
+  }
+
+  NotificationMessage? getNotification(Map<String, dynamic>? additionalData) {
+
+    if(additionalData != null) {
+
+      NotificationType type = NotificationType.general;
+      String? url;
+      String? id;
+
+      if(additionalData.containsKey('url')) {
+        type = NotificationType.page;
+        url = additionalData['url'];
+
+        if(additionalData.containsKey('id')) {
+          type = NotificationType.chat;
+          id = additionalData['id'];
+        }
+      }
+
+      return NotificationMessage(type: type, url: url, id: id);
+    }
+    return null;
   }
 }
