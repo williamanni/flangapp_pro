@@ -78,9 +78,16 @@ class _WebViewerState extends State<WebViewer> {
       OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
       OneSignal.initialize(Config.oneSignalPushId);
       OneSignal.Notifications.requestPermission(true);
+      // OneSignal.Notifications.addClickListener((event) {
+      //   NotificationMessage? notification = getNotification(event.notification.additionalData);
+      //     openPage(notification);
+      // });
       OneSignal.Notifications.addClickListener((event) {
-        NotificationMessage? notification = getNotification(event.notification.additionalData);
-          openPage(notification);
+        var additionalData = event.notification.additionalData;
+        if(additionalData != null && additionalData!.containsKey('url')) {
+          String url = event.notification.additionalData!['url'];
+          openPage(url);
+        }
       });
     }
 
@@ -267,24 +274,21 @@ class _WebViewerState extends State<WebViewer> {
                     };
                   });
 
-                  controller.addJavaScriptHandler(handlerName: 'chatHandler', callback: (args) async {
-
-                    String tempChatConversationId = chatConversationId;
-                    chatConversationId = '';
-                    // return data to the JavaScript side!
-                    return {
-                      'id': tempChatConversationId
-                    };
-                  });
+                  // controller.addJavaScriptHandler(handlerName: 'chatHandler', callback: (args) async {
+                  //
+                  //   String tempChatConversationId = chatConversationId;
+                  //   chatConversationId = '';
+                  //   // return data to the JavaScript side!
+                  //   return {
+                  //     'id': tempChatConversationId
+                  //   };
+                  // });
                 },
                 onReceivedServerTrustAuthRequest: (controller, challenge) async {
                   //Do some checks here to decide if CANCELS or PROCEEDS
                   return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
                 },
                 // onLoadStart: (controller, url) {
-                //   setState(() {
-                //     isPageLoadingInProgress = true;
-                //   });
                 // },
                 onProgressChanged: (controller, progress) {
 
@@ -307,6 +311,7 @@ class _WebViewerState extends State<WebViewer> {
                   });
                 },
                 onLoadStop: (controller, url) async {
+                  currentItem.firstPageLoaded = true;
                   currentItem.pullToRefreshController?.endRefreshing();
                   setState(() {
                     currentItem.progress = 1;
@@ -493,6 +498,7 @@ class _WebViewerState extends State<WebViewer> {
                   progress: 0,
                   isError: false,
                   isInit: false,
+                  firstPageLoaded: false
               ));
         }
       }
@@ -520,6 +526,7 @@ class _WebViewerState extends State<WebViewer> {
                 progress: 0,
                 isError: false,
                 isInit: false,
+                firstPageLoaded: false
             )
       ];
       //showNavigation = widget.appConfig.showNavigationAfterLogin; // TODO - implement showNavigationAfterLogin logic
@@ -533,6 +540,7 @@ class _WebViewerState extends State<WebViewer> {
           progress: 0,
           isError: false,
           isInit: false,
+          firstPageLoaded: false,
         )
       ];
       //showNavigation = widget.appConfig.showNavigationAfterLogin;
@@ -709,40 +717,84 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
-  void openPage(NotificationMessage? notification) {
+  // void openPage(NotificationMessage? notification) {
+  //
+  //   if(notification != null) {
+  //
+  //     List<NavigationItem> items = widget.appConfig.mainNavigation;
+  //
+  //     // If notification.url exists then we have to navigate to that page
+  //     if (items != null && notification.url != null) {
+  //       int chatMenuIndex = items.indexWhere((item) => item.value == notification.url);
+  //
+  //       if (chatMenuIndex >= 0 && chatMenuIndex < items.length) {
+  //         oldPageUrl = currentPageUrl;
+  //         // Update current page url used in the app_tabs to highlight or not the bottom menu item
+  //         currentPageUrl = items[chatMenuIndex].value;
+  //
+  //         // Set the conversation id if is received
+  //         chatConversationId = notification.id != null ? notification.id! : '';
+  //
+  //         setState(() {
+  //           // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
+  //           activePage = chatMenuIndex;
+  //
+  //           // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
+  //           NavigationItem item = widget.appConfig.mainNavigation[activePage];
+  //           // if (item.refresh && item.value != currentPageUrl) {
+  //           if (item.refresh && oldPageUrl != currentPageUrl) {
+  //             setState(() {
+  //               isPageLoadingInProgress = true;
+  //             });
+  //             collection[activePage].controller!.loadUrl(
+  //                 urlRequest: URLRequest(url: WebUri(item.value)));
+  //           }
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
 
-    if(notification != null) {
+  void openPage(String url) async {
+    List<NavigationItem> items = widget.appConfig.mainNavigation;
 
-      List<NavigationItem> items = widget.appConfig.mainNavigation;
+    if (items != null) {
+      int pageMenuIndex = items.indexWhere((item) => url.startsWith(item.value));
 
-      // If notification.url exists then we have to navigate to that page
-      if (items != null && notification.url != null) {
-        int chatMenuIndex = items.indexWhere((item) => item.value == notification.url);
+      if (pageMenuIndex >= 0 && pageMenuIndex < items.length) {
 
-        if (chatMenuIndex >= 0 && chatMenuIndex < items.length) {
-          oldPageUrl = currentPageUrl;
-          // Update current page url used in the app_tabs to highlight or not the bottom menu item
-          currentPageUrl = items[chatMenuIndex].value;
-
-          // Set the conversation id if is received
-          chatConversationId = notification.id != null ? notification.id! : '';
-
-          setState(() {
-            // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
-            activePage = chatMenuIndex;
-
-            // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
-            NavigationItem item = widget.appConfig.mainNavigation[activePage];
-            // if (item.refresh && item.value != currentPageUrl) {
-            if (item.refresh && oldPageUrl != currentPageUrl) {
-              setState(() {
-                isPageLoadingInProgress = true;
-              });
-              collection[activePage].controller!.loadUrl(
-                  urlRequest: URLRequest(url: WebUri(item.value)));
-            }
-          });
+        for (var i = 0; i < 10; i ++) {
+          if(pageMenuIndex >= collection.length) {
+            await Future.delayed(Duration(seconds: 1));
+          }
+          else {
+            break;
+          }
         }
+
+
+        for (var i = 0; i < 10; i ++) {
+          if(collection[pageMenuIndex].firstPageLoaded == false) {
+            await Future.delayed(Duration(seconds: 1));
+          }
+          else {
+            break;
+          }
+        }
+
+        oldPageUrl = currentPageUrl;
+        // Update current page url used in the app_tabs to highlight or not the bottom menu item
+        currentPageUrl = items[pageMenuIndex].value;
+
+        setState(() {
+          activePage = pageMenuIndex;
+          setState(() {
+            isPageLoadingInProgress = true;
+          });
+
+          collection[activePage].controller!.loadUrl(
+              urlRequest: URLRequest(url: WebUri(url)));
+        });
       }
     }
   }
