@@ -18,31 +18,31 @@ workflows:
 
         CERTIFICATE_PRIVATE_KEY: |-
          -----BEGIN RSA PRIVATE KEY-----
-         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
+         MIIEowIBAAKCAQEAuetLCnmJ+/277biqf1Ii/6VwZrj5fdu+K9AnCHvTF4LKewM6
+         JRGWPyMx8xyV4oU95q8Xtvjxue0V7qTz53m98TEKh5THgPRgddIO3E1ZMeNGI91B
+         P7oZXwme8auEg853wse3ke88ASowTKQ8/itSSKlO+kQBluBDq+K0hAUPatpmM89j
+         0pH7zlP5O9hQpXygc+J43FbEsdziWGN+A/3PDjDbe/KsHlwOeP9uEuGiWKj/M2yr
+         bb4xMwnsvqTnwof16ttQfFCxCBw14VfMpUQOThRnU58k1I6TbCSVIDOIJrFDb96J
+         GhPhJBuVv91ViwxV0Dpl6Q5QqzfwHj69TMXVPQIDAQABAoIBACtqfS5fxf982A0y
+         NcyAOZCSCX7PfOGtdkokdG0If3nKzu5tiT89TWUGmsQ/PWg1vcgYRNUzar2Elj3R
+         suxv81F25pLVRUaBquHwsQw0mtrpzEgVQ8a2NnUJWd7tMweVqEVp3p4bbBuIhtlq
+         9BxVsQQrV3hdd7KMQflKemWnCdvlaEPb7rObkMPMYrsutBq5VClXyOOsG519O0Z3
+         xbeE0hOuKQ9RdIA+oTd67a4OnG0eAdutJo4IFxZVHgb4kUsAluhiVjUOVqDlgXzK
+         0QqOBaREIX3UMB5rhpqPGM2IcKq5TpjI2wRSKNCHE0jWNKnNaRPE33mWPkyhYtJw
+         gW1yMIkCgYEAv+uhEAcH/oQGjBt4u7nVAEZHoif1iOUZMahl0CDU9/aRxcicqk8X
+         LZnNKV3H7KGdgvkOJRlodLIbY7DCO5GbpPnyscM5SwktPyRLl11WeEy1JWuYtSIW
+         s2OeNEoJn8fd60osuqyBDTRzXzAFsMEGcA0P0kxpHDWMkvYQB1+uVikCgYEA9/6z
+         4LF8YB4tYm2b5ESf6X/vCDXDECPIZhFFu8httZu0iJr+Qh1d9BGhk/ufVBLP+Du9
+         oOkOPMMaFD7XOPWOMEO53HyJmw88eNoBjSf+k+OCWOC91hAON1tvXAmvJGGelcG/
+         z3y890+6e4nokmJ82RFFfshldXKXttXaak1uYPUCgYArSbx0XwGgmKrZY0DiJtIy
+         U6fInXa2P+Zk2vTL8vvWShkrIUqk5130/SHXWL3FU9axOffEymxTFfEzlSTaRsdy
+         eKYTDlOX5yP7f/ZE19qvG64oGJLDGENChw+h/6kYDv6xGXPpTwt0rQXwzGYcLg2D
+         rI6LAo0avcFNTI7k+uHZsQKBgQCATzPaKXpkcLiimHtz212xfhO6d7Z4/0qMJJuj
+         0MuSjwEVPLwYkQEvan/jBOkmoqUflilCu9I19evkVa8dNU9gAWqEfZrkszlifckX
+         s32wHqIuQfl2a9AvLAut3wTTGf7nFNudCrjqbEHb8Tp3oqVd2eXO9vgnkCaW3oan
+         QXC+kQKBgFS7b2lSBoCbBqznWrF4IcVgnKXrR1v2lFFnVTzZQyChLp+AJ82MfpaR
+         uKJDk8KMTE0iGRTb9/UyaBQKpIWvpNJ3I0VOO0jkndjigWalBK4C8VvBqLVqz8GG
+         GW+v9JhDKkAiQGw6gRkCJ83/jGZLiiE8+zgry99DINPdqA1X3Y49
          -----END RSA PRIVATE KEY-----
          
 
@@ -72,7 +72,7 @@ workflows:
       - name: Flutter build ipa and automatic versioning
         script: |
           flutter build ipa --release --no-tree-shake-icons \
-          --build-name=1.0.6 \
+          --build-name=1.0.7 \
           --build-number=1 \
           --export-options-plist=/Users/builder/export_options.plist
     artifacts:
@@ -87,4 +87,4 @@ workflows:
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=ad64c6d4-2d14-8f2e-680e-a9321b0bd59e
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=36bc1c87-2a56-ebd0-f567-e12c19da25cf
