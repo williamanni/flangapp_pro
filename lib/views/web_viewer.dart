@@ -761,8 +761,31 @@ class _WebViewerState extends State<WebViewer> {
     if (items != null) {
       int pageMenuIndex = items.indexWhere((item) => url.startsWith(item.value));
 
-      if (pageMenuIndex >= 0 && pageMenuIndex < items.length) {
+      if(pageMenuIndex == -1) {
+        for (var i = 0; i < 10; i ++) {
+          if(collection[activePage].firstPageLoaded == false) {
+            await Future.delayed(Duration(seconds: 1));
+          }
+          else {
+            break;
+          }
+        }
 
+        oldPageUrl = currentPageUrl;
+        // Update current page url used in the app_tabs to highlight or not the bottom menu item
+        currentPageUrl = url;
+
+        setState(() {
+          //activePage = pageMenuIndex;
+          setState(() {
+            isPageLoadingInProgress = true;
+          });
+
+          collection[activePage].controller!.loadUrl(
+              urlRequest: URLRequest(url: WebUri(url)));
+        });
+      }
+      else if (pageMenuIndex >= 0 && pageMenuIndex < items.length) {
         for (var i = 0; i < 10; i ++) {
           if(pageMenuIndex >= collection.length) {
             await Future.delayed(Duration(seconds: 1));
@@ -771,7 +794,6 @@ class _WebViewerState extends State<WebViewer> {
             break;
           }
         }
-
 
         for (var i = 0; i < 10; i ++) {
           if(collection[pageMenuIndex].firstPageLoaded == false) {
@@ -787,38 +809,38 @@ class _WebViewerState extends State<WebViewer> {
         currentPageUrl = items[pageMenuIndex].value;
 
         setState(() {
-          activePage = pageMenuIndex;
+          //activePage = pageMenuIndex;
           setState(() {
             isPageLoadingInProgress = true;
           });
 
-          collection[activePage].controller!.loadUrl(
+          collection[0].controller!.loadUrl(
               urlRequest: URLRequest(url: WebUri(url)));
         });
       }
     }
   }
 
-  NotificationMessage? getNotification(Map<String, dynamic>? additionalData) {
-
-    if(additionalData != null) {
-
-      NotificationType type = NotificationType.general;
-      String? url;
-      String? id;
-
-      if(additionalData.containsKey('url')) {
-        type = NotificationType.page;
-        url = additionalData['url'];
-
-        if(additionalData.containsKey('id')) {
-          type = NotificationType.chat;
-          id = additionalData['id'];
-        }
-      }
-
-      return NotificationMessage(type: type, url: url, id: id);
-    }
-    return null;
-  }
+  // NotificationMessage? getNotification(Map<String, dynamic>? additionalData) {
+  //
+  //   if(additionalData != null) {
+  //
+  //     NotificationType type = NotificationType.general;
+  //     String? url;
+  //     String? id;
+  //
+  //     if(additionalData.containsKey('url')) {
+  //       type = NotificationType.page;
+  //       url = additionalData['url'];
+  //
+  //       if(additionalData.containsKey('id')) {
+  //         type = NotificationType.chat;
+  //         id = additionalData['id'];
+  //       }
+  //     }
+  //
+  //     return NotificationMessage(type: type, url: url, id: id);
+  //   }
+  //   return null;
+  // }
 }
