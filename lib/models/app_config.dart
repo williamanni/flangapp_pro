@@ -16,6 +16,7 @@ class AppConfig {
   final bool isDark;
   final bool pullToRefreshEnabled;
   final bool showNavigationAfterLogin;
+  final bool showGuestNavigation;
   final String customUserAgent;
   final String email;
   final Template template;
@@ -48,6 +49,7 @@ class AppConfig {
   // Navigation
   final List<NavigationItem> mainNavigation;
   final List<NavigationItem> barNavigation;
+  final List<NavigationItem> guestNavigation;
 
   AppConfig({
     required this.appName,
@@ -59,6 +61,7 @@ class AppConfig {
     required this.isDark,
     required this.pullToRefreshEnabled,
     required this.showNavigationAfterLogin,
+    required this.showGuestNavigation,
     required this.customUserAgent,
     required this.email,
     required this.template,
@@ -85,7 +88,8 @@ class AppConfig {
     required this.contactBtn,
     required this.backBtn,
     required this.mainNavigation,
-    required this.barNavigation
+    required this.barNavigation,
+    required this.guestNavigation,
   });
 
   factory AppConfig.fromJson(Map<String, dynamic> json) {
@@ -109,6 +113,16 @@ class AppConfig {
         refresh: itemJson['refresh'] ?? true, // TODO - keep also for Bar Navigation?
       );
     }).toList();
+    List<dynamic> navigationItemsJsonGuest = json['navigation']['guest'];
+    List<NavigationItem> guestNavigation = navigationItemsJsonGuest.map((itemJson) {
+      return NavigationItem(
+        name: itemJson['name'],
+        icon: itemJson['icon'],
+        type: _convertToActionType(itemJson['type']),
+        value: itemJson['value'],
+        refresh: itemJson['refresh'] ?? true, // TODO - update with the correct field after BE work is done
+      );
+    }).toList();
     return AppConfig(
       appName: json['name'],
       appLink: json['link'],
@@ -119,6 +133,7 @@ class AppConfig {
       isDark: json['is_dark'],
       pullToRefreshEnabled: json['pull_to_refresh'],
       showNavigationAfterLogin: json['show_navigation_after_login'],
+      showGuestNavigation: json['show_guest_navigation'],
       customUserAgent: json['user_agent'],
       email: json['email'],
       template: _convertToTemplate(json['template']),
@@ -146,6 +161,7 @@ class AppConfig {
       backBtn: json['localization']['back'],
       mainNavigation: mainNavigation,
       barNavigation: barNavigation,
+      guestNavigation: guestNavigation,
     );
   }
 

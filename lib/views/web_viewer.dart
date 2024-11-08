@@ -72,8 +72,16 @@ class _WebViewerState extends State<WebViewer> {
   @override
   void initState() {
     settings.userAgent = widget.appConfig.customUserAgent;
-    createCollection();
-    createPullToRefresh();
+
+    if(widget.appConfig.showGuestNavigation == false) {
+      createCollection();
+      createPullToRefresh();
+    } else {
+      // showNavigation = true;
+      createGuestCollection();
+      createGuestPullToRefresh();
+    }
+
     if (Config.oneSignalPushId.isNotEmpty) {
       OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
       OneSignal.initialize(Config.oneSignalPushId);
@@ -206,18 +214,19 @@ class _WebViewerState extends State<WebViewer> {
           backgroundImage: widget.appConfig.drawerBackgroundImage,
           logoImage: widget.appConfig.drawerLogoImage,
           isDisplayLogo: widget.appConfig.drawerIsDisplayLogo,
-          actions: widget.appConfig.mainNavigation,
+          actions: (widget.appConfig.showGuestNavigation == true && loggedIn == false) ? widget.appConfig.guestNavigation : widget.appConfig.mainNavigation,
           iconColor: widget.appConfig.iconColor,
           onAction: (NavigationItem item) => navigationAction(item),
         ) : null,
         drawerEdgeDragWidth: 0,
         bottomNavigationBar: showNavigation == true && (widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) ? AppTabs(
-          actions: widget.appConfig.mainNavigation,
+          actions: (widget.appConfig.showGuestNavigation == true && loggedIn == false) ? widget.appConfig.guestNavigation : widget.appConfig.mainNavigation,
           activeTab: activePage,
           onChange: (index) {
+            var currentNavigation = (widget.appConfig.showGuestNavigation == true && loggedIn == false) ? widget.appConfig.guestNavigation : widget.appConfig.mainNavigation;
 
             //Reload the page on tab change if the config says so
-            NavigationItem item = widget.appConfig.mainNavigation[index];
+            NavigationItem item = currentNavigation[index];
             if(item.refresh) {
               setState(() {
                 isPageLoadingInProgress = true;
@@ -251,6 +260,7 @@ class _WebViewerState extends State<WebViewer> {
             opacity: isPageLoadingInProgress ? 0 : 1,
             child:
             InAppWebView(
+                key: ValueKey(currentItem.url),
                 initialUrlRequest: URLRequest(url: WebUri(currentItem.url)),
                 initialSettings: settings,
                 pullToRefreshController: widget.appConfig.pullToRefreshEnabled
@@ -259,7 +269,6 @@ class _WebViewerState extends State<WebViewer> {
                 onWebViewCreated: (controller) {
 
                   currentItem.controller = controller;
-
                   controller.addJavaScriptHandler(handlerName: 'pushNotificationsHandler', callback: (args) async {
 
                     String? pushId = OneSignal.User.pushSubscription.id;
@@ -341,7 +350,7 @@ class _WebViewerState extends State<WebViewer> {
 
                   if(currentItem.isInit == true) {
                     // Check if the page we are navigating to is also in the bottom bar menu and get the index of that page
-                    List<NavigationItem> items = widget.appConfig.mainNavigation;
+                    List<NavigationItem> items = (widget.appConfig.showGuestNavigation == true && loggedIn == false) ? widget.appConfig.guestNavigation : widget.appConfig.mainNavigation;
                     int highlightedIndex = items.indexWhere((item) => item.value == navigationAction.request.url.toString());
 
                     setState(() {
@@ -355,7 +364,7 @@ class _WebViewerState extends State<WebViewer> {
                         activePage = highlightedIndex;
 
                         // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
-                        NavigationItem item = widget.appConfig.mainNavigation[activePage];
+                        NavigationItem item = items[activePage];
                         // if (item.refresh && item.value != currentPageUrl) {
                         if (item.refresh && oldPageUrl != currentPageUrl) {
                           setState(() {
@@ -483,38 +492,85 @@ class _WebViewerState extends State<WebViewer> {
     );
   }
 
-  void addRestOfCollectionItems() {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.length > 1) {
-      List<NavigationItem> items = widget.appConfig.mainNavigation;
+  void createGuestCollection() {
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.guestNavigation.isNotEmpty) {
+      List<NavigationItem> items = widget.appConfig.guestNavigation;
 
-      for (var i = 1; i < items.length; i ++) {
-        if (items[i].type == ActionType.internal) {
-          collection.add(
-              WebViewCollection(
-                  url: items[i].value.toString(),
-                  isLoading: true,
-                  title: widget.appConfig.appName,
-                  isCanBack: false,
-                  progress: 0,
-                  isError: false,
-                  isInit: false,
-                  firstPageLoaded: false
-              ));
-        }
-      }
+      collection = [
+        for (var i = 0; i < items.length; i ++)
+          if (items[i].type == ActionType.internal)
+            WebViewCollection(
+              url: items[i].value.toString(),
+              isLoading: true,
+              title: widget.appConfig.appName,
+              isCanBack: false,
+              progress: 0,
+              isError: false,
+              isInit: false,
+              firstPageLoaded: false
+            )
+      ];
+    } else {
+      collection = [
+        WebViewCollection(
+          url: widget.appConfig.appLink,
+          isLoading: true,
+          title: widget.appConfig.appName,
+          isCanBack: false,
+          progress: 0,
+          isError: false,
+          isInit: false,
+          firstPageLoaded: false,
+        )
+      ];
+      //showNavigation = widget.appConfig.showNavigationAfterLogin;
     }
   }
 
-  void removeRestOfCollectionItems() async {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && collection.length > 1) {
-      // Leave only the first page
-      collection.removeRange(1, collection.length);
+  void createGuestPullToRefresh() {
+    if (widget.appConfig.template != Template.tabs) {
+      collection[0].pullToRefreshController = PullToRefreshController(
+        settings: PullToRefreshSettings(
+          color: Colors.grey,
+        ),
+        onRefresh: () async {
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            collection[0].controller?.reload();
+          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+            collection[0].controller?.loadUrl(
+                urlRequest:
+                URLRequest(url: await collection[0].controller?.getUrl()));
+          }
+        },
+      );
+      return;
+    }
+    List<NavigationItem> items = widget.appConfig.guestNavigation;
+    for (var i = 0; i < items.length; i ++) {
+      if (items[i].type == ActionType.internal) {
+        collection[i].pullToRefreshController = PullToRefreshController(
+          settings: PullToRefreshSettings(
+            color: Colors.grey,
+          ),
+          onRefresh: () async {
+            if (defaultTargetPlatform == TargetPlatform.android) {
+              collection[i].controller?.reload();
+            } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+              collection[i].controller?.loadUrl(
+                  urlRequest:
+                  URLRequest(url: await collection[i].controller?.getUrl()));
+            }
+          },
+        );
+      }
     }
   }
 
   void createCollection() {
     if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.isNotEmpty) {
       List<NavigationItem> items = widget.appConfig.mainNavigation;
+
+      collection = [];
 
       collection = [
           if (items[0].type == ActionType.internal)
@@ -547,27 +603,32 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
-  void addRestOfPullToRefreshItems() {
+  void addRestOfCollectionItems() {
     if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.length > 1) {
       List<NavigationItem> items = widget.appConfig.mainNavigation;
+
       for (var i = 1; i < items.length; i ++) {
         if (items[i].type == ActionType.internal) {
-          collection[i].pullToRefreshController = PullToRefreshController(
-            settings: PullToRefreshSettings(
-              color: Colors.grey,
-            ),
-            onRefresh: () async {
-              if (defaultTargetPlatform == TargetPlatform.android) {
-                collection[i].controller?.reload();
-              } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-                collection[i].controller?.loadUrl(
-                    urlRequest:
-                    URLRequest(url: await collection[i].controller?.getUrl()));
-              }
-            },
-          );
+          collection.add(
+              WebViewCollection(
+                  url: items[i].value.toString(),
+                  isLoading: true,
+                  title: widget.appConfig.appName,
+                  isCanBack: false,
+                  progress: 0,
+                  isError: false,
+                  isInit: false,
+                  firstPageLoaded: false
+              ));
         }
       }
+    }
+  }
+
+  void removeRestOfCollectionItems() async {
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && collection.length > 1) {
+      // Leave only the first page
+      collection.removeRange(1, collection.length);
     }
   }
 
@@ -607,6 +668,30 @@ class _WebViewerState extends State<WebViewer> {
           }
         },
       );
+    }
+  }
+
+  void addRestOfPullToRefreshItems() {
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.length > 1) {
+      List<NavigationItem> items = widget.appConfig.mainNavigation;
+      for (var i = 1; i < items.length; i ++) {
+        if (items[i].type == ActionType.internal) {
+          collection[i].pullToRefreshController = PullToRefreshController(
+            settings: PullToRefreshSettings(
+              color: Colors.grey,
+            ),
+            onRefresh: () async {
+              if (defaultTargetPlatform == TargetPlatform.android) {
+                collection[i].controller?.reload();
+              } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+                collection[i].controller?.loadUrl(
+                    urlRequest:
+                    URLRequest(url: await collection[i].controller?.getUrl()));
+              }
+            },
+          );
+        }
+      }
     }
   }
 
@@ -682,28 +767,49 @@ class _WebViewerState extends State<WebViewer> {
             // Logout
             if(loggedIn == true) {
 
-              //Reload first page to show the login page because the user can log out from different page
-              List<NavigationItem> items = widget.appConfig.mainNavigation;
-              setState(() {
-                isPageLoadingInProgress = true;
-              });
-              collection[0].controller!.loadUrl(urlRequest: URLRequest(url: WebUri(items[0].value)));
+              if(widget.appConfig.showGuestNavigation) {
+                setState(() {
+                  createGuestCollection();
+                  createGuestPullToRefresh();
+                  activePage = 0;
+                  showNavigation = true;
+                });
+              } else {
+                //Reload first page to show the login page because the user can log out from different page
+                List<NavigationItem> items = widget.appConfig.mainNavigation;
+                setState(() {
+                  isPageLoadingInProgress = true;
+                });
+                collection[0].controller!.loadUrl(urlRequest: URLRequest(url: WebUri(items[0].value)));
 
-              // hide navigation tabs
-              setState(() {
-                activePage = 0;
-                showNavigation = false;
-                removeRestOfCollectionItems();
-              });
+                // hide navigation tabs
+                setState(() {
+                  activePage = 0;
+                  showNavigation = false;
+                  removeRestOfCollectionItems();
+                });
+              }
 
               loggedIn = false;
+            } else {
+              if(widget.appConfig.showGuestNavigation) {
+                setState(() {
+                  showNavigation = true;
+                });
+              }
             }
           } else {
             // Login
             setState(() {
               if (loggedIn == false) {
+
+                if(widget.appConfig.showGuestNavigation) {
+                  createCollection();
+                  createPullToRefresh();
+                }
                 addRestOfCollectionItems();
                 addRestOfPullToRefreshItems();
+
                 showNavigation = true;
                 loggedIn = true;
               }
@@ -716,44 +822,6 @@ class _WebViewerState extends State<WebViewer> {
       debugPrint(exception.toString());
     }
   }
-
-  // void openPage(NotificationMessage? notification) {
-  //
-  //   if(notification != null) {
-  //
-  //     List<NavigationItem> items = widget.appConfig.mainNavigation;
-  //
-  //     // If notification.url exists then we have to navigate to that page
-  //     if (items != null && notification.url != null) {
-  //       int chatMenuIndex = items.indexWhere((item) => item.value == notification.url);
-  //
-  //       if (chatMenuIndex >= 0 && chatMenuIndex < items.length) {
-  //         oldPageUrl = currentPageUrl;
-  //         // Update current page url used in the app_tabs to highlight or not the bottom menu item
-  //         currentPageUrl = items[chatMenuIndex].value;
-  //
-  //         // Set the conversation id if is received
-  //         chatConversationId = notification.id != null ? notification.id! : '';
-  //
-  //         setState(() {
-  //           // If the page we are navigating to is also an item in the bottom menu, then display that bottom menu page
-  //           activePage = chatMenuIndex;
-  //
-  //           // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
-  //           NavigationItem item = widget.appConfig.mainNavigation[activePage];
-  //           // if (item.refresh && item.value != currentPageUrl) {
-  //           if (item.refresh && oldPageUrl != currentPageUrl) {
-  //             setState(() {
-  //               isPageLoadingInProgress = true;
-  //             });
-  //             collection[activePage].controller!.loadUrl(
-  //                 urlRequest: URLRequest(url: WebUri(item.value)));
-  //           }
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
 
   void openPage(String url) async {
     List<NavigationItem> items = widget.appConfig.mainNavigation;
@@ -820,27 +888,4 @@ class _WebViewerState extends State<WebViewer> {
       }
     }
   }
-
-  // NotificationMessage? getNotification(Map<String, dynamic>? additionalData) {
-  //
-  //   if(additionalData != null) {
-  //
-  //     NotificationType type = NotificationType.general;
-  //     String? url;
-  //     String? id;
-  //
-  //     if(additionalData.containsKey('url')) {
-  //       type = NotificationType.page;
-  //       url = additionalData['url'];
-  //
-  //       if(additionalData.containsKey('id')) {
-  //         type = NotificationType.chat;
-  //         id = additionalData['id'];
-  //       }
-  //     }
-  //
-  //     return NotificationMessage(type: type, url: url, id: id);
-  //   }
-  //   return null;
-  // }
 }
