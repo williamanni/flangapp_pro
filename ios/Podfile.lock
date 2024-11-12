@@ -115,7 +115,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
-  share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
+  share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
 
 PODFILE CHECKSUM: 20a55e50a9a28a9ef8bf25dcc3fb86323b85c491
