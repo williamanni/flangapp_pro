@@ -1,5 +1,6 @@
 import 'package:flangapp_pro/models/enum/action_type.dart';
 
+import 'custom_navigation_item.dart';
 import 'enum/background_mode.dart';
 import 'enum/load_indicator.dart';
 import 'enum/template.dart';
@@ -50,6 +51,7 @@ class AppConfig {
   final List<NavigationItem> mainNavigation;
   final List<NavigationItem> barNavigation;
   final List<NavigationItem> guestNavigation;
+  final List<CustomNavigationItem> customNavigation;
 
   AppConfig({
     required this.appName,
@@ -90,6 +92,7 @@ class AppConfig {
     required this.mainNavigation,
     required this.barNavigation,
     required this.guestNavigation,
+    required this.customNavigation
   });
 
   factory AppConfig.fromJson(Map<String, dynamic> json) {
@@ -123,6 +126,16 @@ class AppConfig {
         refresh: itemJson['refresh'] ?? true, // TODO - update with the correct field after BE work is done
       );
     }).toList();
+
+    List<dynamic> customNavigationItemsJson = json['custom_navigation'];
+    List<CustomNavigationItem> customNavigation = customNavigationItemsJson.map((itemJson) {
+      return CustomNavigationItem(
+        tab: itemJson['tab'],
+        link: itemJson['link'],
+        data: _getCustomNavData(itemJson['data']),
+      );
+    }).toList();
+
     return AppConfig(
       appName: json['name'],
       appLink: json['link'],
@@ -162,6 +175,7 @@ class AppConfig {
       mainNavigation: mainNavigation,
       barNavigation: barNavigation,
       guestNavigation: guestNavigation,
+      customNavigation: customNavigation,
     );
   }
 
@@ -223,5 +237,22 @@ class AppConfig {
       default:
         throw Exception('Unknown action type value: $value');
     }
+  }
+
+  static bool _convertToString(String input) {
+    return (input.toLowerCase() == "true" || input.toLowerCase() == "1") ? true : false;
+  }
+
+  static List<NavigationItem> _getCustomNavData(dynamic itemJson) {
+    List<dynamic> customNavigationDataItemsJson = itemJson;
+    return customNavigationDataItemsJson.map((itemJson) {
+      return NavigationItem(
+        name: itemJson['name'],
+        icon: itemJson['icon'],
+        type: _convertToActionType(itemJson['type']),
+        value: itemJson['link'], // TODO - keep link? or change to value?
+        refresh: _convertToString(itemJson['refresh']) ?? true, // TODO - update with the correct field after BE work is done
+      );
+    }).toList();
   }
 }
