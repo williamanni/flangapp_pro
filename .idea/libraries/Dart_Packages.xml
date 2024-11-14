@@ -292,7 +292,7 @@
         <entry key="mime">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/mime-2.0.0/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/mime-1.0.6/lib" />
             </list>
           </value>
         </entry>
@@ -425,14 +425,14 @@
         <entry key="share_plus">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus-10.1.2/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus-7.2.2/lib" />
             </list>
           </value>
         </entry>
         <entry key="share_plus_platform_interface">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus_platform_interface-5.0.1/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus_platform_interface-3.4.0/lib" />
             </list>
           </value>
         </entry>
@@ -645,7 +645,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/matcher-0.12.16+1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/material_color_utilities-0.11.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.15.0/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/mime-2.0.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/mime-1.0.6/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/nm-0.5.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/onesignal_flutter-5.2.7/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path-1.9.0/lib" />
@@ -664,8 +664,8 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/petitparser-6.0.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/platform-3.1.6/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/plugin_platform_interface-2.1.8/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus-10.1.2/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus_platform_interface-5.0.1/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus-7.2.2/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/share_plus_platform_interface-3.4.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/source_span-1.10.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/sprintf-7.0.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/stack_trace-1.11.1/lib" />
