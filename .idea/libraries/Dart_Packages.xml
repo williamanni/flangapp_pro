@@ -194,7 +194,7 @@
         <entry key="flutter_lints">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_lints-5.0.0/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_lints-4.0.0/lib" />
             </list>
           </value>
         </entry>
@@ -264,7 +264,7 @@
         <entry key="lints">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/lints-5.0.0/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/lints-4.0.0/lib" />
             </list>
           </value>
         </entry>
@@ -633,7 +633,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_inappwebview_platform_interface-1.3.0+1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_inappwebview_web-1.1.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_inappwebview_windows-0.6.0/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_lints-5.0.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_lints-4.0.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/http_parser-4.0.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/ionicons-0.2.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/ionicons_named-1.3.2+6/lib" />
@@ -641,7 +641,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/leak_tracker-10.0.5/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.5/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/leak_tracker_testing-3.0.1/lib" />
-      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/lints-5.0.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/lints-4.0.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/matcher-0.12.16+1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/material_color_utilities-0.11.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.15.0/lib" />
