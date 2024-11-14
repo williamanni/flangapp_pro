@@ -47,7 +47,7 @@ workflows:
          
 
         BUNDLE_ID: "it.bsslab.apppetite"
-      flutter: 3.24.4
+      flutter: 3.16.7
       xcode: latest
       cocoapods: default
     scripts:
@@ -72,7 +72,7 @@ workflows:
       - name: Flutter build ipa and automatic versioning
         script: |
           flutter build ipa --release --no-tree-shake-icons \
-          --build-name=1.0.63 \
+          --build-name=1.0.64 \
           --build-number=1 \
           --export-options-plist=/Users/builder/export_options.plist
     artifacts:
@@ -87,4 +87,4 @@ workflows:
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=f4a3f58e-98aa-c0f7-c8bf-05d0493625dc
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=8b5a3364-66db-2913-e9ad-f6f9c7cbac15
