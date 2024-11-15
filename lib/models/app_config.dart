@@ -103,7 +103,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['value'],
-        refresh: itemJson['refresh'] ?? true, // TODO - update with the correct field after BE work is done
+        refresh: itemJson['refresh']
       );
     }).toList();
     List<dynamic> navigationItemsJsonBar = json['navigation']['bar'];
@@ -123,7 +123,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['value'],
-        refresh: itemJson['refresh'] ?? true, // TODO - update with the correct field after BE work is done
+        refresh: itemJson['refresh']
       );
     }).toList();
 
@@ -251,7 +251,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['link'], // TODO - keep link? or change to value?
-        refresh: _convertToString(itemJson['refresh']) ?? true, // TODO - update with the correct field after BE work is done
+        refresh: itemJson['refresh']
       );
     }).toList();
   }
