@@ -8,7 +8,7 @@
 PRODUCT_NAME = flangapp_pro
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = pro.flangapp.app.flangappPro
+PRODUCT_BUNDLE_IDENTIFIER = it.bsslab.appsostenibile
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2024 pro.flangapp.app. All rights reserved.
