@@ -87,4 +87,4 @@ workflows:
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=dc52c7aa-e63a-fbf3-3aed-fdada6b61ca3
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=46b2ccc7-dcfb-39fe-31ed-c87a050b278d
