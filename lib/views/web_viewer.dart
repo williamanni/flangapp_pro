@@ -68,7 +68,7 @@ class _WebViewerState extends State<WebViewer> {
   String chatConversationId = '';
   List<NavigationItem> currentNavigationItems = [];
   BottomBarNavigationType currentNavType = BottomBarNavigationType.unknown;
-  String lastPageWithNavigation = '';
+  List<String> pagesWithNavigation = [];
 
   final urlController = TextEditingController();
 
@@ -423,8 +423,7 @@ class _WebViewerState extends State<WebViewer> {
                   currentItem.firstPageLoaded = true;
                   currentItem.pullToRefreshController?.endRefreshing();
 
-                  if(url.toString() == lastPageWithNavigation) {
-                    lastPageWithNavigation = '';
+                  if(pagesWithNavigation.contains(url.toString())) {
                     setState(() {
                       showNavigation = true;
                     });
@@ -1055,7 +1054,12 @@ class _WebViewerState extends State<WebViewer> {
 
               if(showMenu == false) {
                 showNavigation = false;
-                lastPageWithNavigation = oldPageUrl;
+              }
+
+              if(showNavigation == true) {
+                if(pagesWithNavigation.contains(currentPageUrl) == false) {
+                  pagesWithNavigation.add(currentPageUrl);
+                }
               }
             });
           }
