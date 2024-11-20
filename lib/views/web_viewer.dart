@@ -68,6 +68,7 @@ class _WebViewerState extends State<WebViewer> {
   String chatConversationId = '';
   List<NavigationItem> currentNavigationItems = [];
   BottomBarNavigationType currentNavType = BottomBarNavigationType.unknown;
+  String lastPageWithNavigation = '';
 
   final urlController = TextEditingController();
 
@@ -421,6 +422,14 @@ class _WebViewerState extends State<WebViewer> {
                 onLoadStop: (controller, url) async {
                   currentItem.firstPageLoaded = true;
                   currentItem.pullToRefreshController?.endRefreshing();
+
+                  if(url.toString() == lastPageWithNavigation) {
+                    lastPageWithNavigation = '';
+                    setState(() {
+                      showNavigation = true;
+                    });
+                  }
+
                   setState(() {
                     currentItem.progress = 1;
                     isPageLoadingInProgress = false;
@@ -979,6 +988,12 @@ class _WebViewerState extends State<WebViewer> {
         String url = request.uri.toString();
         if (url.contains('auth')) {
           String? userId = request.uri.queryParameters['id'];
+          String? showBottomMenuValue = request.uri.queryParameters['show_menu'];
+
+          bool showMenu = true;
+          if(showBottomMenuValue != null && showBottomMenuValue?.toLowerCase() == 'false') {
+            showMenu = false;
+          }
 
           if (userId == null || userId.isEmpty) {
             setState(() {
@@ -1021,6 +1036,7 @@ class _WebViewerState extends State<WebViewer> {
           } else {
             // Login
             setState(() {
+
               if (loggedIn == false) {
 
                 if(widget.appConfig.showGuestNavigation) {
@@ -1035,6 +1051,11 @@ class _WebViewerState extends State<WebViewer> {
                 loggedIn = true;
               } else {
                 isPageLoadingInProgress = false;
+              }
+
+              if(showMenu == false) {
+                showNavigation = false;
+                lastPageWithNavigation = oldPageUrl;
               }
             });
           }
