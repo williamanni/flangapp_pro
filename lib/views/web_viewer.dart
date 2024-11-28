@@ -598,6 +598,9 @@ class _WebViewerState extends State<WebViewer> {
                         'HTTP: ${request.url}: ${errorResponse.statusCode} ${errorResponse.reasonPhrase ?? ''}'),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    currentItem.isError = true;
+                  });
                 },
                 onReceivedError: (controller, request, error) async {
                   currentItem.pullToRefreshController?.endRefreshing();
@@ -626,12 +629,16 @@ class _WebViewerState extends State<WebViewer> {
               onBack: () {
                 setState(() {
                   collection[activePage].controller?.goBack();
+                  isPageLoadingInProgress = true;
+
+                  collection[activePage].controller!.loadUrl(
+                      urlRequest: URLRequest(url: WebUri(collection[activePage].url)));
                   currentItem.isError = false;
                 });
               },
               color: widget.appConfig.color,
               email: widget.appConfig.email,
-              image: widget.appConfig.errorBrowserImage,
+              //image: widget.appConfig.errorBrowserImage,
               message: widget.appConfig.messageErrorBrowser,
               buttonBackLabel: widget.appConfig.backBtn,
               buttonContactLabel: widget.appConfig.contactBtn

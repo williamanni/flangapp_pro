@@ -6,7 +6,7 @@ class ErrorPage extends StatefulWidget {
   final VoidCallback onBack;
   final String color;
   final String email;
-  final String image;
+  //final String image;
   final String message;
   final String buttonBackLabel;
   final String buttonContactLabel;
@@ -15,7 +15,7 @@ class ErrorPage extends StatefulWidget {
     required this.onBack,
     required this.color,
     required this.email,
-    required this.image,
+    //required this.image,
     required this.message,
     required this.buttonBackLabel,
     required this.buttonContactLabel
@@ -46,10 +46,10 @@ class _ErrorPageState extends State<ErrorPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Image.network(widget.image, width: 100),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(bottom: 20),
+            //   child: Image.network(widget.image, width: 100),
+            // ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
               child: Text(widget.message, style: const TextStyle(
