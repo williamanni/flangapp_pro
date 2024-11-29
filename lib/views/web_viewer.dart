@@ -69,6 +69,7 @@ class _WebViewerState extends State<WebViewer> {
   List<NavigationItem> currentNavigationItems = [];
   BottomBarNavigationType currentNavType = BottomBarNavigationType.unknown;
   List<String> pagesWithNavigation = [];
+  List<String> pagesWithoutTopBar = [];
 
   final urlController = TextEditingController();
 
@@ -186,7 +187,7 @@ class _WebViewerState extends State<WebViewer> {
       child: Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: true,
-        appBar: widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.bar ? Navbar(
+        appBar: ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.bar) && pagesWithoutTopBar.contains(currentPageUrl) == false) ? Navbar(
           background: widget.appConfig.color,
           isDark: widget.appConfig.isDark,
           title: widget.appConfig.displayTitle ? collection[activePage].title : widget.appConfig.appName,
@@ -995,10 +996,17 @@ class _WebViewerState extends State<WebViewer> {
         if (url.contains('auth')) {
           String? userId = request.uri.queryParameters['id'];
           String? showBottomMenuValue = request.uri.queryParameters['show_menu'];
+          String? showTopBarValue = request.uri.queryParameters['show_top_bar'];
 
           bool showMenu = true;
           if(showBottomMenuValue != null && showBottomMenuValue?.toLowerCase() == 'false') {
             showMenu = false;
+          }
+
+          if(showTopBarValue != null && showTopBarValue?.toLowerCase() == 'false') {
+            if(pagesWithoutTopBar.contains(currentPageUrl) == false) {
+              pagesWithoutTopBar.add(currentPageUrl);
+            }
           }
 
           if (userId == null || userId.isEmpty) {
@@ -1007,7 +1015,6 @@ class _WebViewerState extends State<WebViewer> {
             });
             // Logout
             if(loggedIn == true) {
-
               if(widget.appConfig.showGuestNavigation) {
                 setState(() {
                   createGuestCollection();
