@@ -54,7 +54,7 @@ class _WebViewerState extends State<WebViewer> {
     useOnDownloadStart: true,
   );
 
-  List<WebViewCollection> collection = [];
+  List<WebViewCollection> collection = []; // WebViewCollection items for the bottom bar navigation
   int activePage = 0;
   bool isOffline = false;
   StreamSubscription<ConnectivityResult>? subscription;
@@ -62,11 +62,12 @@ class _WebViewerState extends State<WebViewer> {
   late HttpServer server;
   bool loggedIn = false;
   String currentPageUrl = '';
+  String randomKeyPart = '';
   String oldPageUrl = '';
   bool isPageLoadingInProgress = false;
   String platform = '';
   String chatConversationId = '';
-  List<NavigationItem> currentNavigationItems = [];
+  List<NavigationItem> currentNavigationItems = []; // Current bottom bar navigation items. It can be from main nav, guest nav, custom nav...
   BottomBarNavigationType currentNavType = BottomBarNavigationType.unknown;
   List<String> pagesWithNavigation = [];
   List<String> pagesWithoutTopBar = [];
@@ -78,12 +79,11 @@ class _WebViewerState extends State<WebViewer> {
     settings.userAgent = widget.appConfig.customUserAgent;
 
     if(widget.appConfig.showGuestNavigation == false) {
-      createCollection();
-      createPullToRefresh();
+      // Create collection with the first item from main navigation items
+      createGeneralCollection(widget.appConfig.mainNavigation.getRange(0, 1).toList(), BottomBarNavigationType.main);
     } else {
       isPageLoadingInProgress = true;
-      createGuestCollection();
-      createGuestPullToRefresh();
+      createGeneralCollection(widget.appConfig.guestNavigation, BottomBarNavigationType.guest);
     }
 
     if (Config.oneSignalPushId.isNotEmpty) {
@@ -187,6 +187,7 @@ class _WebViewerState extends State<WebViewer> {
       child: Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: true,
+        // Top Bar
         appBar: ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.bar) && pagesWithoutTopBar.contains(currentPageUrl) == false) ? Navbar(
           background: widget.appConfig.color,
           isDark: widget.appConfig.isDark,
@@ -198,17 +199,20 @@ class _WebViewerState extends State<WebViewer> {
           onAction: (NavigationItem item) => navigationAction(item),
           onOpenDrawer: () => _scaffoldKey.currentState!.openDrawer(),
         ) : null,
+        // Body area (the web views)
         body: SafeArea(
-          // top: widget.appConfig.template == Template.blank,
+          // Top Safe Area for the templates without a Top Bar
           top: widget.appConfig.template == Template.blank || widget.appConfig.template == Template.tabs,
           child: !isOffline ? IndexedStack(
             index: activePage,
             children: [
+              // Create the web view for teach item inside collection list
               for (var i = 0; i < collection.length; i ++)
                 webContainer(i),
             ],
           ) : OfflinePage(),
         ),
+        // Drawer
         drawer: widget.appConfig.template == Template.drawerBar ? AppDrawer(
           title: widget.appConfig.drawerTitle,
           subtitle: widget.appConfig.drawerSubtitle,
@@ -223,32 +227,31 @@ class _WebViewerState extends State<WebViewer> {
           onAction: (NavigationItem item) => navigationAction(item),
         ) : null,
         drawerEdgeDragWidth: 0,
+        // Bottom navigation bar
         bottomNavigationBar: showNavigation == true && (widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) ? AppTabs(
-          actions: currentNavigationItems, // (widget.appConfig.showGuestNavigation == true && loggedIn == false) ? widget.appConfig.guestNavigation : widget.appConfig.mainNavigation,
+          actions: currentNavigationItems,
           activeTab: activePage,
           onChange: (index) {
-            //var currentNavigation = (widget.appConfig.showGuestNavigation == true && loggedIn == false) ? widget.appConfig.guestNavigation : widget.appConfig.mainNavigation;
 
+            // Get the item the user clicked
             NavigationItem item = currentNavigationItems[index];
 
-            ////////////
-
-
-            // Check if we have a custom navigation for this page or we have to display the main navigation
+            // Check if we have a custom navigation for this page
             List<NavigationItem>? customNavItems = getCustomNavItem(item.value);
 
+            Function eq = const ListEquality().equals;
             if(customNavItems != null) {
+              // Custom navigation
               int customIndex = 0;
-              Function eq = const ListEquality().equals;
               setState(() {
-                if(currentNavType != BottomBarNavigationType.custom || eq(currentNavigationItems, customNavItems) == false) {
-                  createCustomNavCollection(customNavItems);
-                  createCustomNavPullToRefresh();
+                if(eq(currentNavigationItems, customNavItems) == false) {
+                  // Create a new collection for the bottom bar navigation
+                  createGeneralCollection(customNavItems, BottomBarNavigationType.custom);
                 } else {
-                  customIndex = index < currentNavigationItems.length ? index : 0;
+                  // We don't have a new collection, we are working with an existing collection
+                  customIndex = index;// < currentNavigationItems.length ? index : 0;
 
-                  item = currentNavigationItems[customIndex];
-
+                  // Check if the page needs to reload
                   if(item.refresh) {
                     isPageLoadingInProgress = true;
                     collection[index].controller!.loadUrl(
@@ -256,75 +259,82 @@ class _WebViewerState extends State<WebViewer> {
                   }
                 }
 
+                // Set the active page. 0 for a newly created collection or the clicked index for an existing collection
                 activePage = customIndex;
-                // isPageLoadingInProgress = true;
 
-                // collection[customIndex].controller!.loadUrl(
-                //     urlRequest: URLRequest(url: WebUri(item.value)));
+                oldPageUrl = currentPageUrl;
+                // Update current page url used in the app_tabs to highlight or not the bottom menu item
+                currentPageUrl = item.value;
               });
             } else {
+              // No custom navigation. Main or guest
 
               if(currentNavType == BottomBarNavigationType.guest) {
-                activePage = index < currentNavigationItems.length ? index : 0;
+                // If we are already on a guest navigation menu type, then just update the active page
+                setState(() {
+                  activePage = index;// < currentNavigationItems.length ? index : 0;
+
+                  if(item.refresh) {
+                    isPageLoadingInProgress = true;
+                    collection[index].controller!.loadUrl(
+                        urlRequest: URLRequest(url: WebUri(item.value)));
+                  }
+
+                  oldPageUrl = currentPageUrl;
+                  // Update current page url used in the app_tabs to highlight or not the bottom menu item
+                  currentPageUrl = item.value;
+                });
               } else {
-                if (currentNavType != BottomBarNavigationType.main) {
-                  createCollection();
-                  createPullToRefresh();
-                  addRestOfCollectionItems();
-                  addRestOfPullToRefreshItems();
+                // Main navigation type
+                if(eq(currentNavigationItems, widget.appConfig.mainNavigation) == false) {
+                  // Current navigation items are not main. Then create the main navigation collection and set active page to 0
                   setState(() {
+                    createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
                     activePage = 0;
+
+                    if(item.refresh) {
+                      isPageLoadingInProgress = true;
+                      collection[index].controller!.loadUrl(
+                          urlRequest: URLRequest(url: WebUri(item.value)));
+                    }
+
+                    oldPageUrl = currentPageUrl;
+                    // Update current page url used in the app_tabs to highlight or not the bottom menu item
+                    currentPageUrl = item.value;
                   });
                 } else {
+                  // If we are already on a main navigation menu type, then just update the active page
                   setState(() {
-                    activePage =
-                    index < currentNavigationItems.length ? index : 0;
+                    activePage = index;// < currentNavigationItems.length ? index : 0;
+
+                    if(item.refresh) {
+                      isPageLoadingInProgress = true;
+                      collection[index].controller!.loadUrl(
+                          urlRequest: URLRequest(url: WebUri(item.value)));
+                    }
+
+                    oldPageUrl = currentPageUrl;
+                    // Update current page url used in the app_tabs to highlight or not the bottom menu item
+                    currentPageUrl = item.value;
                   });
                 }
               }
 
-              if(item.refresh) {
-                setState(() {
-                  isPageLoadingInProgress = true;
-                });
-                collection[index].controller!.loadUrl(
-                    urlRequest: URLRequest(url: WebUri(item.value)));
-              }
+              // Check if the page needs to reload
+              // if(item.refresh) {
+              //   setState(() {
+              //     isPageLoadingInProgress = true;
+              //     collection[index].controller!.loadUrl(
+              //         urlRequest: URLRequest(url: WebUri(item.value)));
+              //   });
+              // }
             }
 
-            //------------------------
-
-            // Check if we have a custom navigation for this page or we have to display the main navigation
-            // List<NavigationItem>? customNavItems = getCustomNavItem(item.value);
-            // if(customNavItems != null) {
-            //   currentNavigationItems = customNavItems;
-            //   int customIndex = index < currentNavigationItems.length ? index : 0;
-            //   item = currentNavigationItems[customIndex];
-            //   setState(() {
-            //     isPageLoadingInProgress = true;
-            //   });
-            //   collection[customIndex].controller!.loadUrl(
-            //       urlRequest: URLRequest(url: WebUri(item.value)));
-            // } else {
-            //   //Reload the page on tab change if the config says so
-            //   if(item.refresh) {
-            //     setState(() {
-            //       isPageLoadingInProgress = true;
-            //     });
-            //     collection[index].controller!.loadUrl(
-            //         urlRequest: URLRequest(url: WebUri(item.value)));
-            //   }
-            // }
-            //////////////
-
-            setState(() {
-              // Update bottom bar active page index
-              //activePage = index < currentNavigationItems.length ? index : 0;
-
-              oldPageUrl = currentPageUrl;
-              // Update current page url used in the app_tabs to highlight or not the bottom menu item
-              currentPageUrl = item.value;
-            });
+            // setState(() {
+            //   oldPageUrl = currentPageUrl;
+            //   // Update current page url used in the app_tabs to highlight or not the bottom menu item
+            //   currentPageUrl = item.value;
+            // });
           },
           color: widget.appConfig.activeColor,
           currentPageUrl: currentPageUrl,
@@ -361,7 +371,7 @@ class _WebViewerState extends State<WebViewer> {
             opacity: isPageLoadingInProgress ? 0 : 1,
             child:
             InAppWebView(
-                key: ValueKey(currentItem.url),
+                key: ValueKey(currentItem.url + randomKeyPart),
                 initialUrlRequest: URLRequest(url: WebUri(currentItem.url)),
                 initialSettings: settings,
                 pullToRefreshController: widget.appConfig.pullToRefreshEnabled
@@ -470,27 +480,27 @@ class _WebViewerState extends State<WebViewer> {
 
                       if(customNavItems != null) {
 
-                        if(currentNavType != BottomBarNavigationType.custom || eq(currentNavigationItems, customNavItems) == false) {
-                          activePage = 0;
-                          createCustomNavCollection(customNavItems);
-                          createCustomNavPullToRefresh();
+                        int customIndex = 0;
+                        // Custom navigation
+                        if(eq(currentNavigationItems, customNavItems) == false) {
+                          // Create a new collection for the bottom bar navigation
+                          createGeneralCollection(customNavItems, BottomBarNavigationType.custom);
                         } else {
-                          activePage = index < currentNavigationItems.length ? index : 0;
+                          // We don't have a new collection, we are working with an existing collection
+                          customIndex = index;// < currentNavigationItems.length ? index : 0;
                         }
 
-                        setState(() {
-                          isPageLoadingInProgress = true;
-                          collection[activePage].controller!.loadUrl(
-                              urlRequest: URLRequest(url: WebUri(customNavItems[activePage].value)));
-                        });
+                        // setState(() {
+                        //   isPageLoadingInProgress = true;
+                        //   collection[customIndex].controller!.loadUrl(
+                        //       urlRequest: URLRequest(url: WebUri(customNavItems[customIndex].value)));
+                        // });
 
                         isCustomNavigation = true;
                       } else {
                         if(currentNavType != BottomBarNavigationType.main) {
-                          createCollection();
-                          createPullToRefresh();
-                          addRestOfCollectionItems();
-                          addRestOfPullToRefreshItems();
+                          // Main navigation type
+                          createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
                         }
                       }
                     }
@@ -510,13 +520,10 @@ class _WebViewerState extends State<WebViewer> {
 
                         // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
                         NavigationItem item = currentNavigationItems[activePage];
-                        // if (item.refresh && item.value != currentPageUrl) {
                         if (item.refresh && oldPageUrl != currentPageUrl) {
-                          setState(() {
                             isPageLoadingInProgress = true;
-                          });
-                          collection[activePage].controller!.loadUrl(
-                              urlRequest: URLRequest(url: WebUri(item.value)));
+                            collection[activePage].controller!.loadUrl(
+                                urlRequest: URLRequest(url: WebUri(item.value)));
                         }
                       }
                     });
@@ -648,179 +655,48 @@ class _WebViewerState extends State<WebViewer> {
     );
   }
 
-  void createGuestCollection() {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.guestNavigation.isNotEmpty) {
-      //List<NavigationItem> items = widget.appConfig.guestNavigation;
-      currentNavigationItems = widget.appConfig.guestNavigation;
-      currentNavType = BottomBarNavigationType.guest;
+  void createGeneralCollection(List<NavigationItem> navigation, BottomBarNavigationType barNavType) {
+    randomKeyPart = DateTime.now().millisecondsSinceEpoch.toString();
+    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && navigation.isNotEmpty) {
 
-      collection = [
-        for (var i = 0; i < currentNavigationItems.length; i ++)
-          if (currentNavigationItems[i].type == ActionType.internal)
-            WebViewCollection(
-                url: currentNavigationItems[i].value.toString(),
-                isLoading: true,
-                title: widget.appConfig.appName,
-                isCanBack: false,
-                progress: 0,
-                isError: false,
-                isInit: false,
-                firstPageLoaded: false
-            )
-      ];
-    } else {
-      collection = [
-        WebViewCollection(
-          url: widget.appConfig.appLink,
-          isLoading: true,
-          title: widget.appConfig.appName,
-          isCanBack: false,
-          progress: 0,
-          isError: false,
-          isInit: false,
-          firstPageLoaded: false,
-        )
-      ];
-      //showNavigation = widget.appConfig.showNavigationAfterLogin;
-    }
-  }
+      currentNavType = barNavType;
+      currentNavigationItems = navigation;
 
-  void createGuestPullToRefresh() {
-    if (widget.appConfig.template != Template.tabs) {
-      collection[0].pullToRefreshController = PullToRefreshController(
-        settings: PullToRefreshSettings(
-          color: Colors.grey,
-        ),
-        onRefresh: () async {
-          if (defaultTargetPlatform == TargetPlatform.android) {
-            collection[0].controller?.reload();
-          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-            collection[0].controller?.loadUrl(
-                urlRequest:
-                URLRequest(url: await collection[0].controller?.getUrl()));
-          }
-        },
-      );
-      return;
-    }
-    //List<NavigationItem> items = widget.appConfig.guestNavigation;
-    for (var i = 0; i < currentNavigationItems.length; i ++) {
-      if (currentNavigationItems[i].type == ActionType.internal) {
-        collection[i].pullToRefreshController = PullToRefreshController(
-          settings: PullToRefreshSettings(
-            color: Colors.grey,
-          ),
-          onRefresh: () async {
-            if (defaultTargetPlatform == TargetPlatform.android) {
-              collection[i].controller?.reload();
-            } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-              collection[i].controller?.loadUrl(
-                  urlRequest:
-                  URLRequest(url: await collection[i].controller?.getUrl()));
-            }
-          },
-        );
-      }
-    }
-  }
-
-  void createCustomNavCollection(List<NavigationItem> items) {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && items.isNotEmpty) {
-      currentNavigationItems = items;
-      currentNavType = BottomBarNavigationType.custom;
-
-      collection = [
-        for (var i = 0; i < currentNavigationItems.length; i ++)
-          if (currentNavigationItems[i].type == ActionType.internal)
-            WebViewCollection(
-                url: currentNavigationItems[i].value.toString(),
-                isLoading: true,
-                title: widget.appConfig.appName,
-                isCanBack: false,
-                progress: 0,
-                isError: false,
-                isInit: false,
-                firstPageLoaded: false
-            )
-      ];
-    } else {
-      collection = [
-        WebViewCollection(
-          url: widget.appConfig.appLink,
-          isLoading: true,
-          title: widget.appConfig.appName,
-          isCanBack: false,
-          progress: 0,
-          isError: false,
-          isInit: false,
-          firstPageLoaded: false,
-        )
-      ];
-      //showNavigation = widget.appConfig.showNavigationAfterLogin;
-    }
-  }
-
-  void createCustomNavPullToRefresh() {
-    if (widget.appConfig.template != Template.tabs) {
-      collection[0].pullToRefreshController = PullToRefreshController(
-        settings: PullToRefreshSettings(
-          color: Colors.grey,
-        ),
-        onRefresh: () async {
-          if (defaultTargetPlatform == TargetPlatform.android) {
-            collection[0].controller?.reload();
-          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-            collection[0].controller?.loadUrl(
-                urlRequest:
-                URLRequest(url: await collection[0].controller?.getUrl()));
-          }
-        },
-      );
-      return;
-    }
-
-    for (var i = 0; i < currentNavigationItems.length; i ++) {
-      if (currentNavigationItems[i].type == ActionType.internal) {
-        collection[i].pullToRefreshController = PullToRefreshController(
-          settings: PullToRefreshSettings(
-            color: Colors.grey,
-          ),
-          onRefresh: () async {
-            if (defaultTargetPlatform == TargetPlatform.android) {
-              collection[i].controller?.reload();
-            } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-              collection[i].controller?.loadUrl(
-                  urlRequest:
-                  URLRequest(url: await collection[i].controller?.getUrl()));
-            }
-          },
-        );
-      }
-    }
-  }
-
-  void createCollection() {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.isNotEmpty) {
-      //List<NavigationItem> items = widget.appConfig.mainNavigation;
-      currentNavigationItems = widget.appConfig.mainNavigation;
-      currentNavType = BottomBarNavigationType.main;
       collection = [];
+        for (var i = 0; i < currentNavigationItems.length; i ++) {
+          if (currentNavigationItems[i].type == ActionType.internal) {
 
-      collection = [
-        if (currentNavigationItems[0].type == ActionType.internal)
-          WebViewCollection(
-              url: currentNavigationItems[0].value.toString(),
-              isLoading: true,
-              title: widget.appConfig.appName,
-              isCanBack: false,
-              progress: 0,
-              isError: false,
-              isInit: false,
-              firstPageLoaded: false
-          )
-      ];
-      //showNavigation = widget.appConfig.showNavigationAfterLogin; // TODO - implement showNavigationAfterLogin logic
+            // Add the collection items
+            collection.add(WebViewCollection(
+                url: currentNavigationItems[i].value.toString(),
+                isLoading: true,
+                title: widget.appConfig.appName,
+                isCanBack: false,
+                progress: 0,
+                isError: false,
+                isInit: false,
+                firstPageLoaded: false
+            ));
+
+            // Create pull to refresh controller for the collection items
+            collection[i].pullToRefreshController = PullToRefreshController(
+              settings: PullToRefreshSettings(
+                color: Colors.grey,
+              ),
+              onRefresh: () async {
+                if (defaultTargetPlatform == TargetPlatform.android) {
+                  collection[i].controller?.reload();
+                } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+                  collection[i].controller?.loadUrl(
+                      urlRequest:
+                      URLRequest(url: await collection[i].controller?.getUrl()));
+                }
+              },
+            );
+          }
+        }
     } else {
+      // Create the single collection item
       collection = [
         WebViewCollection(
           url: widget.appConfig.appLink,
@@ -833,99 +709,24 @@ class _WebViewerState extends State<WebViewer> {
           firstPageLoaded: false,
         )
       ];
+
+      // Create pull to refresh controller for the single collection item
+      collection[0].pullToRefreshController = PullToRefreshController(
+        settings: PullToRefreshSettings(
+          color: Colors.grey,
+        ),
+        onRefresh: () async {
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            collection[0].controller?.reload();
+          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+            collection[0].controller?.loadUrl(
+                urlRequest:
+                URLRequest(url: await collection[0].controller?.getUrl()));
+          }
+        },
+      );
+
       //showNavigation = widget.appConfig.showNavigationAfterLogin;
-    }
-  }
-
-  void addRestOfCollectionItems() {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.length > 1) {
-      // List<NavigationItem> items = widget.appConfig.mainNavigation;
-
-      for (var i = 1; i < currentNavigationItems.length; i ++) {
-        if (currentNavigationItems[i].type == ActionType.internal) {
-          collection.add(
-              WebViewCollection(
-                  url: currentNavigationItems[i].value.toString(),
-                  isLoading: true,
-                  title: widget.appConfig.appName,
-                  isCanBack: false,
-                  progress: 0,
-                  isError: false,
-                  isInit: false,
-                  firstPageLoaded: false
-              ));
-        }
-      }
-    }
-  }
-
-  void removeRestOfCollectionItems() async {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && collection.length > 1) {
-      // Leave only the first page
-      collection.removeRange(1, collection.length);
-    }
-  }
-
-  void createPullToRefresh() {
-    if (widget.appConfig.template != Template.tabsBar &&
-        widget.appConfig.template != Template.tabs) {
-      collection[0].pullToRefreshController = PullToRefreshController(
-        settings: PullToRefreshSettings(
-          color: Colors.grey,
-        ),
-        onRefresh: () async {
-          if (defaultTargetPlatform == TargetPlatform.android) {
-            collection[0].controller?.reload();
-          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-            collection[0].controller?.loadUrl(
-                urlRequest:
-                URLRequest(url: await collection[0].controller?.getUrl()));
-          }
-        },
-      );
-      return;
-    }
-    //List<NavigationItem> items = widget.appConfig.mainNavigation;
-
-    if (currentNavigationItems.isNotEmpty && currentNavigationItems[0].type == ActionType.internal) {
-      collection[0].pullToRefreshController = PullToRefreshController(
-        settings: PullToRefreshSettings(
-          color: Colors.grey,
-        ),
-        onRefresh: () async {
-          if (defaultTargetPlatform == TargetPlatform.android) {
-            collection[0].controller?.reload();
-          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-            collection[0].controller?.loadUrl(
-                urlRequest:
-                URLRequest(url: await collection[0].controller?.getUrl()));
-          }
-        },
-      );
-    }
-  }
-
-  void addRestOfPullToRefreshItems() {
-    if ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && widget.appConfig.mainNavigation.length > 1) {
-      //List<NavigationItem> items = widget.appConfig.mainNavigation;
-      for (var i = 1; i < currentNavigationItems.length; i ++) {
-        if (currentNavigationItems[i].type == ActionType.internal) {
-          collection[i].pullToRefreshController = PullToRefreshController(
-            settings: PullToRefreshSettings(
-              color: Colors.grey,
-            ),
-            onRefresh: () async {
-              if (defaultTargetPlatform == TargetPlatform.android) {
-                collection[i].controller?.reload();
-              } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-                collection[i].controller?.loadUrl(
-                    urlRequest:
-                    URLRequest(url: await collection[i].controller?.getUrl()));
-              }
-            },
-          );
-        }
-      }
     }
   }
 
@@ -1017,8 +818,7 @@ class _WebViewerState extends State<WebViewer> {
             if(loggedIn == true) {
               if(widget.appConfig.showGuestNavigation) {
                 setState(() {
-                  createGuestCollection();
-                  createGuestPullToRefresh();
+                  createGeneralCollection(widget.appConfig.guestNavigation, BottomBarNavigationType.guest);
                   activePage = 0;
                   showNavigation = true;
                 });
@@ -1034,7 +834,7 @@ class _WebViewerState extends State<WebViewer> {
                 setState(() {
                   activePage = 0;
                   showNavigation = false;
-                  removeRestOfCollectionItems();
+                  createGeneralCollection(widget.appConfig.mainNavigation.getRange(0, 1).toList(), BottomBarNavigationType.main);
                 });
               }
 
@@ -1051,13 +851,7 @@ class _WebViewerState extends State<WebViewer> {
             setState(() {
 
               if (loggedIn == false) {
-
-                if(widget.appConfig.showGuestNavigation) {
-                  createCollection();
-                  createPullToRefresh();
-                }
-                addRestOfCollectionItems();
-                addRestOfPullToRefreshItems();
+                createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
 
                 isPageLoadingInProgress = false;
                 showNavigation = true;
