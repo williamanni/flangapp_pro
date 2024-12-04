@@ -480,15 +480,16 @@ class _WebViewerState extends State<WebViewer> {
 
                       if(customNavItems != null) {
 
-                        int customIndex = 0;
+                        // int customIndex = 0;
                         // Custom navigation
                         if(eq(currentNavigationItems, customNavItems) == false) {
                           // Create a new collection for the bottom bar navigation
                           createGeneralCollection(customNavItems, BottomBarNavigationType.custom);
-                        } else {
-                          // We don't have a new collection, we are working with an existing collection
-                          customIndex = index;// < currentNavigationItems.length ? index : 0;
                         }
+                        // else {
+                        //   // We don't have a new collection, we are working with an existing collection
+                        //   customIndex = index;// < currentNavigationItems.length ? index : 0;
+                        // }
 
                         // setState(() {
                         //   isPageLoadingInProgress = true;
@@ -498,8 +499,12 @@ class _WebViewerState extends State<WebViewer> {
 
                         isCustomNavigation = true;
                       } else {
-                        if(currentNavType != BottomBarNavigationType.main) {
-                          // Main navigation type
+                        // if(currentNavType != BottomBarNavigationType.main) {
+                        //   // Main navigation type
+                        //   createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
+                        // }
+                        if(eq(currentNavigationItems, widget.appConfig.mainNavigation) == false) {
+                          // Create a new collection for the bottom bar navigation
                           createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
                         }
                       }
