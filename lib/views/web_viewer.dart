@@ -520,9 +520,9 @@ class _WebViewerState extends State<WebViewer> {
                     currentItem.isInit = true;
                   }
 
-                  if(isCustomNavigation) {
-                    return NavigationActionPolicy.CANCEL;
-                  }
+                  // if(isCustomNavigation) {
+                  //   return NavigationActionPolicy.CANCEL;
+                  // }
 
                   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
                     final shouldPerformDownload =
