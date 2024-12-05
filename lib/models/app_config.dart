@@ -239,7 +239,7 @@ class AppConfig {
     }
   }
 
-  static bool _convertToString(String input) {
+  static bool _convertToBool(String input) {
     return (input.toLowerCase() == "true" || input.toLowerCase() == "1") ? true : false;
   }
 
