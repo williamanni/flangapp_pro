@@ -38,7 +38,7 @@
     </queries>
     <!--#enddocregion android-queries-->
     <application
-        android:label="flangapp_pro"
+        android:label="App Sostenibile"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
