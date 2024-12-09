@@ -59,6 +59,7 @@ class _WebViewerState extends State<WebViewer> {
   bool isOffline = false;
   StreamSubscription<ConnectivityResult>? subscription;
   bool showNavigation = false;
+  bool showTopBar = false;
   late HttpServer server;
   bool loggedIn = false;
   String currentPageUrl = '';
@@ -70,7 +71,7 @@ class _WebViewerState extends State<WebViewer> {
   List<NavigationItem> currentNavigationItems = []; // Current bottom bar navigation items. It can be from main nav, guest nav, custom nav...
   BottomBarNavigationType currentNavType = BottomBarNavigationType.unknown;
   List<String> pagesWithNavigation = [];
-  List<String> pagesWithoutTopBar = [];
+  List<String> pagesWithTopBar = [];
 
   final urlController = TextEditingController();
 
@@ -188,7 +189,7 @@ class _WebViewerState extends State<WebViewer> {
         key: _scaffoldKey,
         resizeToAvoidBottomInset: true,
         // Top Bar
-        appBar: ((widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.bar) && pagesWithoutTopBar.contains(currentPageUrl) == false) ? Navbar(
+        appBar: showTopBar == true && (widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.bar) ? Navbar(
           background: widget.appConfig.color,
           isDark: widget.appConfig.isDark,
           title: widget.appConfig.displayTitle ? collection[activePage].title : widget.appConfig.appName,
@@ -222,13 +223,13 @@ class _WebViewerState extends State<WebViewer> {
           backgroundImage: widget.appConfig.drawerBackgroundImage,
           logoImage: widget.appConfig.drawerLogoImage,
           isDisplayLogo: widget.appConfig.drawerIsDisplayLogo,
-          actions: currentNavigationItems, // (widget.appConfig.showGuestNavigation == true && loggedIn == false) ? widget.appConfig.guestNavigation : widget.appConfig.mainNavigation,
+          actions: currentNavigationItems,
           iconColor: widget.appConfig.iconColor,
           onAction: (NavigationItem item) => navigationAction(item),
         ) : null,
         drawerEdgeDragWidth: 0,
         // Bottom navigation bar
-        bottomNavigationBar: showNavigation == true && (widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) ? AppTabs(
+        bottomNavigationBar: showNavigation == true && (widget.appConfig.template == Template.tabsBar || widget.appConfig.template == Template.tabs) && currentNavigationItems.length > 1 ? AppTabs(
           actions: currentNavigationItems,
           activeTab: activePage,
           onChange: (index) {
@@ -319,22 +320,7 @@ class _WebViewerState extends State<WebViewer> {
                   });
                 }
               }
-
-              // Check if the page needs to reload
-              // if(item.refresh) {
-              //   setState(() {
-              //     isPageLoadingInProgress = true;
-              //     collection[index].controller!.loadUrl(
-              //         urlRequest: URLRequest(url: WebUri(item.value)));
-              //   });
-              // }
             }
-
-            // setState(() {
-            //   oldPageUrl = currentPageUrl;
-            //   // Update current page url used in the app_tabs to highlight or not the bottom menu item
-            //   currentPageUrl = item.value;
-            // });
           },
           color: widget.appConfig.activeColor,
           currentPageUrl: currentPageUrl,
@@ -434,13 +420,14 @@ class _WebViewerState extends State<WebViewer> {
                   currentItem.firstPageLoaded = true;
                   currentItem.pullToRefreshController?.endRefreshing();
 
-                  if(pagesWithNavigation.contains(url.toString())) {
-                    setState(() {
-                      showNavigation = true;
-                    });
-                  }
-
                   setState(() {
+                    if(pagesWithTopBar.contains(url.toString())) {
+                      showTopBar = true;
+                    }
+
+                    if(pagesWithNavigation.contains(url.toString())) {
+                      showNavigation = true;
+                    }
                     currentItem.progress = 1;
                     isPageLoadingInProgress = false;
                   });
@@ -452,6 +439,13 @@ class _WebViewerState extends State<WebViewer> {
                 },
                 onUpdateVisitedHistory: (controller, url, androidIsReload) {
                   debugPrint("UPDATE HISTORY");
+
+                  // Check if the need to clear browsing history to hide the back arrow
+                  NavigationItem? item = currentNavigationItems.firstWhereOrNull((element) => element.value == url.toString());
+                  if(item != null) {
+                    currentItem.controller?.clearHistory();
+                  }
+
                   controller.canGoBack().then((value) {
                     debugPrint("NEW VALUE $value");
                     setState(() {
@@ -465,8 +459,6 @@ class _WebViewerState extends State<WebViewer> {
                   if (defaultTargetPlatform == TargetPlatform.android) {
                     currentItem.isInit = true;
                   }
-
-                  bool isCustomNavigation = false;
 
                   if(currentItem.isInit == true) {
                     // Check if we have to display the Guest navigation (user not logged in)
@@ -485,7 +477,6 @@ class _WebViewerState extends State<WebViewer> {
                           createGeneralCollection(customNavItems, BottomBarNavigationType.custom);
                         }
 
-                        isCustomNavigation = true;
                       } else {
                         if(currentNavType != BottomBarNavigationType.main) {
                           // Main navigation type
@@ -510,19 +501,15 @@ class _WebViewerState extends State<WebViewer> {
                         // If the page we are navigating to is also an item in the bottom menu, check if it needs to refresh or not
                         NavigationItem item = currentNavigationItems[activePage];
                         if (item.refresh && oldPageUrl != currentPageUrl) {
-                            isPageLoadingInProgress = true;
-                            collection[activePage].controller!.loadUrl(
-                                urlRequest: URLRequest(url: WebUri(item.value)));
+                          isPageLoadingInProgress = true;
+                          collection[activePage].controller!.loadUrl(
+                              urlRequest: URLRequest(url: WebUri(item.value)));
                         }
                       }
                     });
                   } else {
                     currentItem.isInit = true;
                   }
-
-                  // if(isCustomNavigation) {
-                  //   return NavigationActionPolicy.CANCEL;
-                  // }
 
                   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
                     final shouldPerformDownload =
@@ -645,38 +632,38 @@ class _WebViewerState extends State<WebViewer> {
       currentNavigationItems = navigation;
 
       collection = [];
-        for (var i = 0; i < currentNavigationItems.length; i ++) {
-          if (currentNavigationItems[i].type == ActionType.internal) {
+      for (var i = 0; i < currentNavigationItems.length; i ++) {
+        if (currentNavigationItems[i].type == ActionType.internal) {
 
-            // Add the collection items
-            collection.add(WebViewCollection(
-                url: currentNavigationItems[i].value.toString(),
-                isLoading: true,
-                title: widget.appConfig.appName,
-                isCanBack: false,
-                progress: 0,
-                isError: false,
-                isInit: false,
-                firstPageLoaded: false
-            ));
+          // Add the collection items
+          collection.add(WebViewCollection(
+              url: currentNavigationItems[i].value.toString(),
+              isLoading: true,
+              title: widget.appConfig.appName,
+              isCanBack: false,
+              progress: 0,
+              isError: false,
+              isInit: false,
+              firstPageLoaded: false
+          ));
 
-            // Create pull to refresh controller for the collection items
-            collection[i].pullToRefreshController = PullToRefreshController(
-              settings: PullToRefreshSettings(
-                color: Colors.grey,
-              ),
-              onRefresh: () async {
-                if (defaultTargetPlatform == TargetPlatform.android) {
-                  collection[i].controller?.reload();
-                } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-                  collection[i].controller?.loadUrl(
-                      urlRequest:
-                      URLRequest(url: await collection[i].controller?.getUrl()));
-                }
-              },
-            );
-          }
+          // Create pull to refresh controller for the collection items
+          collection[i].pullToRefreshController = PullToRefreshController(
+            settings: PullToRefreshSettings(
+              color: Colors.grey,
+            ),
+            onRefresh: () async {
+              if (defaultTargetPlatform == TargetPlatform.android) {
+                collection[i].controller?.reload();
+              } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+                collection[i].controller?.loadUrl(
+                    urlRequest:
+                    URLRequest(url: await collection[i].controller?.getUrl()));
+              }
+            },
+          );
         }
+      }
     } else {
       // Create the single collection item
       collection = [
@@ -786,15 +773,22 @@ class _WebViewerState extends State<WebViewer> {
             showMenu = false;
           }
 
-          if(showTopBarValue != null && showTopBarValue?.toLowerCase() == 'false') {
-            if(pagesWithoutTopBar.contains(currentPageUrl) == false) {
-              pagesWithoutTopBar.add(currentPageUrl);
+          bool showBar = true;
+          if(showTopBarValue != null) {
+
+            if(showTopBarValue?.toLowerCase() == 'false') {
+              showBar = false;
+            } else {
+              if(pagesWithTopBar.contains(currentPageUrl) == false) {
+                pagesWithTopBar.add(currentPageUrl);
+              }
             }
           }
 
           if (userId == null || userId.isEmpty) {
             setState(() {
               isPageLoadingInProgress = false;
+              showTopBar = showBar;
             });
             // Logout
             if(loggedIn == true) {
@@ -806,14 +800,11 @@ class _WebViewerState extends State<WebViewer> {
                 });
               } else {
                 //Reload first page to show the login page because the user can log out from different page
-                List<NavigationItem> items = widget.appConfig.mainNavigation;
+                collection[0].controller!.loadUrl(urlRequest: URLRequest(url: WebUri(widget.appConfig.mainNavigation[0].value)));
                 setState(() {
                   isPageLoadingInProgress = true;
-                });
-                collection[0].controller!.loadUrl(urlRequest: URLRequest(url: WebUri(items[0].value)));
 
-                // hide navigation tabs
-                setState(() {
+                  // hide navigation tabs
                   activePage = 0;
                   showNavigation = false;
                   createGeneralCollection(widget.appConfig.mainNavigation.getRange(0, 1).toList(), BottomBarNavigationType.main);
@@ -831,6 +822,8 @@ class _WebViewerState extends State<WebViewer> {
           } else {
             // Login
             setState(() {
+
+              showTopBar = showBar;
 
               if (loggedIn == false) {
                 createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
