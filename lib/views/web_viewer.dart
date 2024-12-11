@@ -60,7 +60,7 @@ class _WebViewerState extends State<WebViewer> {
   StreamSubscription<ConnectivityResult>? subscription;
   bool showNavigation = false;
   bool showTopBar = false;
-  late HttpServer server;
+  HttpServer? server;
   bool loggedIn = false;
   String currentPageUrl = '';
   String randomKeyPart = '';
@@ -138,10 +138,16 @@ class _WebViewerState extends State<WebViewer> {
   }
 
   @override
-  dispose() {
+  dispose() async {
     subscription?.cancel();
+
+    if (server != null) {
+      await server!.close();
+      server = null;
+      debugPrint('Server stopped.');
+    }
+
     super.dispose();
-    server.close();
   }
 
   @override
@@ -233,6 +239,10 @@ class _WebViewerState extends State<WebViewer> {
           actions: currentNavigationItems,
           activeTab: activePage,
           onChange: (index) {
+
+            if(isServerRunning() == false) {
+              startServer();
+            }
 
             // Get the item the user clicked
             NavigationItem item = currentNavigationItems[index];
@@ -454,6 +464,10 @@ class _WebViewerState extends State<WebViewer> {
                   });
                 },
                 shouldOverrideUrlLoading: (controller, navigationAction) async {
+
+                  if(isServerRunning() == false) {
+                    startServer();
+                  }
 
                   // On Android the shouldOverrideUrlLoading callback is not called as many times as on iOS, so this condition is not required
                   if (defaultTargetPlatform == TargetPlatform.android) {
@@ -768,72 +782,73 @@ class _WebViewerState extends State<WebViewer> {
       server = await HttpServer.bindSecure(
           InternetAddress.anyIPv6, 4200, securityContext);
 
-      await for (var request in server) {
+      await for (var request in server!) {
         String url = request.uri.toString();
         if (url.contains('auth')) {
           String? userId = request.uri.queryParameters['id'];
-          String? showBottomMenuValue = request.uri.queryParameters['show_menu'];
+          String? showBottomMenuValue = request.uri
+              .queryParameters['show_menu'];
           String? showTopBarValue = request.uri.queryParameters['show_top_bar'];
 
           bool showMenu = true;
-          if(showBottomMenuValue != null && showBottomMenuValue?.toLowerCase() == 'false') {
+          if (showBottomMenuValue != null &&
+              showBottomMenuValue?.toLowerCase() == 'false') {
             showMenu = false;
           }
 
           bool showBar = true;
-          if(showTopBarValue != null) {
-
-            if(showTopBarValue?.toLowerCase() == 'false') {
+          if (showTopBarValue != null) {
+            if (showTopBarValue?.toLowerCase() == 'false') {
               showBar = false;
             } else {
-              if(pagesWithTopBar.contains(currentPageUrl) == false) {
+              if (pagesWithTopBar.contains(currentPageUrl) == false) {
                 pagesWithTopBar.add(currentPageUrl);
               }
             }
           }
 
-          if (userId == null || userId.isEmpty) {
-            setState(() {
+          setState(() {
+            if (userId == null || userId.isEmpty) {
               isPageLoadingInProgress = false;
               showTopBar = showBar;
-            });
-            // Logout
-            if(loggedIn == true) {
-              if(widget.appConfig.showGuestNavigation) {
-                setState(() {
-                  createGeneralCollection(widget.appConfig.guestNavigation, BottomBarNavigationType.guest);
+
+              // Logout
+              if (loggedIn == true) {
+                if (widget.appConfig.showGuestNavigation) {
+                  createGeneralCollection(widget.appConfig.guestNavigation,
+                      BottomBarNavigationType.guest);
                   activePage = 0;
                   showNavigation = true;
-                });
-              } else {
-                //Reload first page to show the login page because the user can log out from different page
-                collection[0].controller!.loadUrl(urlRequest: URLRequest(url: WebUri(widget.appConfig.mainNavigation[0].value)));
-                setState(() {
+                } else {
                   isPageLoadingInProgress = true;
+
+                  //Reload first page to show the login page because the user can log out from different page
+                  collection[0].controller!.loadUrl(urlRequest: URLRequest(
+                      url: WebUri(widget.appConfig.mainNavigation[0].value)));
 
                   // hide navigation tabs
                   activePage = 0;
                   showNavigation = false;
-                  createGeneralCollection(widget.appConfig.mainNavigation.getRange(0, 1).toList(), BottomBarNavigationType.main);
-                });
-              }
+                  createGeneralCollection(
+                      widget.appConfig.mainNavigation.getRange(0, 1).toList(),
+                      BottomBarNavigationType.main);
+                }
 
-              loggedIn = false;
-            } else {
-              if(widget.appConfig.showGuestNavigation) {
-                setState(() {
+                loggedIn = false;
+              } else {
+                if (widget.appConfig.showGuestNavigation) {
                   showNavigation = true;
-                });
+                } else {
+                  showNavigation = false;
+                }
               }
-            }
-          } else {
-            // Login
-            setState(() {
-
+            } else {
+              // Login
               showTopBar = showBar;
 
               if (loggedIn == false) {
-                createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
+                createGeneralCollection(widget.appConfig.mainNavigation,
+                    BottomBarNavigationType.main);
 
                 isPageLoadingInProgress = false;
                 showNavigation = true;
@@ -842,23 +857,28 @@ class _WebViewerState extends State<WebViewer> {
                 isPageLoadingInProgress = false;
               }
 
-              if(showMenu == false) {
+              if (showMenu == false) {
                 showNavigation = false;
               }
 
-              if(showNavigation == true) {
-                if(pagesWithNavigation.contains(currentPageUrl) == false) {
+              if (showNavigation == true) {
+                if (pagesWithNavigation.contains(currentPageUrl) == false) {
                   pagesWithNavigation.add(currentPageUrl);
                 }
               }
-            });
-          }
+            }
+          });
         }
       }
     }
     catch (exception, stacktrace) {
       debugPrint(exception.toString());
     }
+  }
+
+  // Check if the server is running
+  bool isServerRunning() {
+    return server != null;
   }
 
   void openPage(String url) async {
@@ -883,9 +903,7 @@ class _WebViewerState extends State<WebViewer> {
 
         setState(() {
           //activePage = pageMenuIndex;
-          setState(() {
-            isPageLoadingInProgress = true;
-          });
+          isPageLoadingInProgress = true;
 
           collection[activePage].controller!.loadUrl(
               urlRequest: URLRequest(url: WebUri(url)));
@@ -916,9 +934,7 @@ class _WebViewerState extends State<WebViewer> {
 
         setState(() {
           //activePage = pageMenuIndex;
-          setState(() {
-            isPageLoadingInProgress = true;
-          });
+          isPageLoadingInProgress = true;
 
           collection[0].controller!.loadUrl(
               urlRequest: URLRequest(url: WebUri(url)));
