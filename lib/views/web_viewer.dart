@@ -57,7 +57,7 @@ class _WebViewerState extends State<WebViewer> {
   List<WebViewCollection> collection = []; // WebViewCollection items for the bottom bar navigation
   int activePage = 0;
   bool isOffline = false;
-  StreamSubscription<ConnectivityResult>? subscription;
+  StreamSubscription<List<ConnectivityResult>>? subscription;
   bool showNavigation = false;
   bool showTopBar = false;
   HttpServer? server;
@@ -108,14 +108,14 @@ class _WebViewerState extends State<WebViewer> {
 
     startServer();
 
-    subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      if (result == ConnectivityResult.none) {
+    subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+      if (result.contains(ConnectivityResult.mobile) || result.contains(ConnectivityResult.wifi) || result.contains(ConnectivityResult.ethernet)) {
         setState(() {
-          isOffline = true;
+          isOffline = false;
         });
       } else {
         setState(() {
-          isOffline = false;
+          isOffline = true;
         });
       }
     });
