@@ -1,0 +1,86 @@
+workflows:
+  ios-workflow:
+    name: Flangapp PRO iOS without publication
+    max_build_duration: 30
+    environment:
+      vars:
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        APP_STORE_CONNECT_ISSUER_ID: 69a6de77-1782-47e3-e053-5b8c7c11a4d1
+        APP_STORE_CONNECT_KEY_IDENTIFIER: BKD935QVN7
+        APP_STORE_CONNECT_PRIVATE_KEY: |-
+         -----BEGIN PRIVATE KEY-----
+         MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgQ2MUxpBhgboscItX
+         RA8qMLW1IZUKTIsXsj028z8/MfmgCgYIKoZIzj0DAQehRANCAASZ3cger7v53amY
+         rHhXOtOst42mDyIbUpVqZDGGz/dzqAknsFHbCPosNCteGlXS8CPihKDNvWWt20Ho
+         DVnvY2fc
+         -----END PRIVATE KEY-----
+
+        CERTIFICATE_PRIVATE_KEY: |-
+         -----BEGIN RSA PRIVATE KEY-----
+         MIIEogIBAAKCAQEA1Xv6XB87Br//olL69w2S4nZzlX6lvGxrN17Mswzb0RlNplUf
+         2+yuDJYV5t1cot/0O956yUcyreoKZuA3D5DQvOeopGLl27qv2eVjjPAJVvjeCW2V
+         CWln729x5G3HlfKx8xN69CrzCkKZhdKMjRh3jvXDtWw7g4KZYhfhr6vJB/jm2Crw
+         AisN6Hw7DV8QgJsDbHIkeA0z1e6CREOVNYIucBBVOrGz5g99W8SY/uhIi3IQ3cqJ
+         9yAudXAdH3lAL1ACFbQiw56q3HCqgGnsp7o8ELbCyw0CYvgw5PAMoyfh2/9EeEwe
+         vgqLS9glilRJoQSFWie0spdBQsm5XklmGGjLBwIDAQABAoIBAESGIvpm299yyW8l
+         C4E5Tih6tOcLW897TX7cYwAl5HjdklsNf8hr1AIeOrF75DwzfoWpB+iLfezs7qHO
+         3l2UsiuwgCUjyXwaFE/wnV+jvJu6DisgjXIT71SfhQM5aZLr78qCOjkdgB2O+xBF
+         YO/5Jocww7z8HK49wVYHLF3i2ghAekkeLI0M76UTfSqIEMPtMVbTPxYinhchgZ5O
+         Wxm3JAqC/AjQtCDuZh9fFiwAC8AalE7dGfefilLY9NXItNrMtNAHDKWt6ErhdL9B
+         j1+8Ffaq7R0d2uewxgFZUxAswwoLhKe9c90rO/IVEPLEk8xjcOVNZZjFzCGFTyXe
+         0q7T80ECgYEA4RvlkboV2tM3FnVMiWL8nr1Vg6AZ31h3ZY8Un9DKbXuxfqaGKrut
+         gmzNM9ylAqs8Mk/uji8VzOrMzn9BFISpFk+YhcyS8EzctATLYjar6vdMhJAccktf
+         det+CaKpOMNwq3QE5xd06C7UA9fnWrIulwvwLR+rXqwh7u4RLMLwkgkCgYEA8se0
+         bqWf7Lfd3mAHSqg7K9PO6goFGE1gOWGzP97fmZouX0U0YkBnP75F8XwlGGiHyklN
+         ik2YjA62GdM3NqyIEEYVz+wo0IFXtBOpp/lDyzM0Kfq+0C7R9KHt/aEJ14BCev26
+         yOyL403ggsOKsX0uREM8ghh0LH2d/455QGu7eI8CgYBbjHnfuzs6JF4p/whic2Rj
+         toJ5pnn/MD5WiksL9+Drh7uW02iLJoqZGWCW7+wX2sX/fCx7nMCT9wXWEUDJdG5D
+         yZkxCRLVMZ0shSqlxbBDPdHbs7Qt82NeVKiMiJ+jmzBOOj/oL8z2xFyrN3o6k26J
+         NWy3HUMXnI+sWRuZBarK6QKBgHJJZnvLxewGZhBfvi774Nbx3263Bsz457o7bsk7
+         XqENPpUkm9NApBoStRRHr6K82md0eGcJviz4Y+rmThCTyX13sJ7vegslSCcCNpRX
+         N/24/e5hFmAkGjwB2mnR3DMxMpp5ROt+xx9asrx71pdU6WnDCQHpBw9GlxENfbDA
+         xkCrAoGAWQFZIdxWRXJYZxpeBOMwNpHJHuZ/nen1nD+9U+tV7n3CznCJpznolav8
+         vXgU+C8cZbAjxeRPEFhTqtGdalZY2vT5SW5no37tUz5DctanqpnYOOXt6d2lxJpN
+         yxa/cmyEgzg0cvE+ENIZGNgC0AKracIMLrJ9ljQOk9UgK/01Iko=
+         -----END RSA PRIVATE KEY-----
+         
+
+        BUNDLE_ID: "it.bsslab.webphonedev"
+      flutter: 3.24.4
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up keychain to be used for codesigning using Codemagic CLI 'keychain' command
+        script: |
+          keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files $BUNDLE_ID --type IOS_APP_STORE --create --log-api-calls --verbose
+      - name: Use system default keychain
+        script: |
+          keychain add-certificates
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: |
+          cd . && flutter packages pub get
+      - name: Install pods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+      - name: Flutter build ipa and automatic versioning
+        script: |
+          flutter build ipa --release --no-tree-shake-icons \
+          --build-name=1.0.0 \
+          --build-number=1 \
+          --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      scripts:
+        - name: HTTP notification
+          script: |
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=79894c12-2c23-f140-fbfd-f045cec30916
