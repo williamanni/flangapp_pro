@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flangapp PRO',
+      title: 'BSS VoIP',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey.withOpacity(0.5)),
         useMaterial3: true,

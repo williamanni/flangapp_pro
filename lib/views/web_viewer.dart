@@ -95,6 +95,17 @@ class _WebViewerState extends State<WebViewer> {
       //   NotificationMessage? notification = getNotification(event.notification.additionalData);
       //     openPage(notification);
       // });
+
+      // OneSignal.Notifications.addForegroundWillDisplayListener((event) {
+      //   /// Display Notification, preventDefault to not display
+      //   event.preventDefault();
+      //
+      //   /// Do async work
+      //
+      //   /// notification.display() to display after preventing default
+      //   event.notification.display();
+      // });
+      
       OneSignal.Notifications.addClickListener((event) {
         var additionalData = event.notification.additionalData;
         if(additionalData != null && additionalData!.containsKey('url')) {

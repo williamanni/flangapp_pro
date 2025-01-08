@@ -76,4 +76,6 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation 'com.onesignal:OneSignal:5.1.25'
+}

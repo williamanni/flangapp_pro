@@ -64,6 +64,11 @@
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+
+        <!-- name doesn't change, value = your class fully name spaced
+        <meta-data android:name="com.onesignal.NotificationServiceExtension"
+            android:value="pro.flangapp.app.flangapp_pro.NotificationServiceExtension" />
+-->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
