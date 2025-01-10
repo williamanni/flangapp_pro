@@ -1,33 +1,90 @@
 workflows:
-  android-workflow:
-    name: Flangapp PRO Android apk
+  ios-workflow:
+    name: Flangapp PRO iOS with publication
     max_build_duration: 30
     environment:
       vars:
-        PACKAGE_NAME: "it.bsslab.appsostenibile"
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        APP_STORE_CONNECT_ISSUER_ID: 69a6de77-1782-47e3-e053-5b8c7c11a4d1
+        APP_STORE_CONNECT_KEY_IDENTIFIER: BKD935QVN7
+        APP_STORE_CONNECT_PRIVATE_KEY: |-
+         -----BEGIN PRIVATE KEY-----
+         MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgQ2MUxpBhgboscItX
+         RA8qMLW1IZUKTIsXsj028z8/MfmgCgYIKoZIzj0DAQehRANCAASZ3cger7v53amY
+         rHhXOtOst42mDyIbUpVqZDGGz/dzqAknsFHbCPosNCteGlXS8CPihKDNvWWt20Ho
+         DVnvY2fc
+         -----END PRIVATE KEY-----
+
+        CERTIFICATE_PRIVATE_KEY: |-
+         -----BEGIN RSA PRIVATE KEY-----
+         MIIEowIBAAKCAQEAuJVXVcWJeESA8gX7imJH7ZrDO1njDqTzfyzjhvO6Q43k0uWu
+         +AH4iFaSi/HLCVg290BXgn8NoKoycpaGF7ub60pxrQmYkYDpVvyce/5r0fS0krVz
+         zUxnFC1GtJxdYXsdwJGoqPoMamm5hcibleK2jWi4U+dvb8gTWI4yE6U0hxUn8WmL
+         8DH9SyCj97AHjem3xndv5le2XkbhNX/4PM2obQuvaYHntXN+ZFy4dtPo1ipTSOO9
+         z/02Xgw/eCzKaTgHrDeig3MT8WcDpCFUWhkpsNUZrBpxYLZ1bzYImWflwwv7pwjJ
+         w9rIFdk6HeaY+fNbEKWYYA8r7Bpfn2sa2smCGwIDAQABAoH/HG1kFj7SBV46Z+kr
+         ATRUF+V2Nr8ZSVAfJUQMNUlZBBBmJfE8q7I6OSX/csN3yzdlewbHNSrH2j9FUVKp
+         7V2n3JFnm3OPUWHM3w3aGqBo2vJvppdJfSjBNdBpVAK6/xVyCHsChxdtJhjz0Q4c
+         oumHYGCGj0DscYt39610DdisSa6lvGHSrgwECrVaV+29qqFqJ73OOupy283BLRBw
+         FTdIHajWWykQsGwP46n7XaB9Ha40btFRZqKmFOyB73CA1xnf0BC2blppQZgcCfxG
+         xeSMpWpFQS5qi+zJqDckHBBw4FcCAUtv7AdRvfS8rYxJWTzUjF5Nmilyjw2h1W2r
+         Ku7RAoGBAPL7nw9vyEWVc+vyJc3M5mZJFIKkV75jwx3DTLUY/H9lnV8NNd1e09sE
+         kbSSfeyMrZHccO2YxSmsHD0DxwFrnqzTERlSjwBOlSpw/Zf3tm8lpa3fl4KYt5G2
+         FBbjVPD2buhJZ/Yy3MOUJV/pL0Ti/xpw5p7WmTq5yl77a1vy0mPRAoGBAMJ4zUnF
+         gphPXP20ZA+IU0cSrcBN5kB3RxYrfTsdfcR9AE+VDqEOlIsNcAVXTSQGdH5Aqy72
+         1Fm3YexnuvhGDMy8VjRKctVHdLVc1zSLjfLmBI3E9vy7YGipdM6L3Wrc4NByMHAC
+         6xpD2QdwjLcSgq2jdSf7V29+dQTfMlizDF4rAoGBAIuoHBAfS5jTAcHHd/sFnheE
+         QYmlM9l2NZtRuTENn3MJ0J3lVeRasKHdynFjEYV4hfqkHTQy7n+5MLHRDfy/AoCK
+         //TyAsdGY231a4yBEBZqKQP603Z4mGnjoUBWgWfN/Ij+SAa1zTWMXL73o/eQENf9
+         tE/vQDsEtlBJabd7pXlBAoGBAIYpyw7S+RbU4cWR1to0ZaeJxl7+HxRodZ1g4WOQ
+         I/0Tc8xzfAU2xtnrqlW09d4dqe6T9MVQug0vC5qJsZ6ozRnN8PbgSbrEMksQwtNY
+         V9S0RX383ZxcNNXf2lrIeTfJLDwCG1KbYNDc7/RG/H0sgwUB2Mh9iMO9jUOQK+6v
+         j5/DAoGBALvsHtEi7Wbq1xNtXMrc6sHj2yjCo7W/deuwLXFbhRb52ivUjMYwsbyD
+         jaAHm84MB6vLlu7EjxGbWO84wld2eke7/q4EdnhBD2JnbgMsu9+b6nlwlUWZL/N3
+         jQLaS2FJoX7jaaLoPqFeJt7kBJxGKXswiS5nffBgilsHcsDPHiTK
+         -----END RSA PRIVATE KEY-----
+         
+
+        BUNDLE_ID: "it.bsslab.appsostenibile"
       flutter: 3.24.4
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Set up local.properties
+      - name: Set up keychain to be used for codesigning using Codemagic CLI 'keychain' command
         script: |
-          echo "flutter.sdk=$HOME/programs/flutter" > "$FCI_BUILD_DIR/android/local.properties"
+          keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files $BUNDLE_ID --type IOS_APP_STORE --create --log-api-calls --verbose
+      - name: Use system default keychain
+        script: |
+          keychain add-certificates
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
       - name: Get Flutter packages
         script: |
           cd . && flutter packages pub get
       - name: Install pods
         script: |
           find . -name "Podfile" -execdir pod install \;
-      - name: Build APK with Flutter
+      - name: Flutter build ipa and automatic versioning
         script: |
-          cd . && flutter build apk --release --no-tree-shake-icons --build-name=1.0.14 --build-number=$(($(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks="$GOOGLE_PLAY_TRACK") + 1))
+          flutter build ipa --release --no-tree-shake-icons \
+          --build-name=1.0.15 \
+          --build-number=1 \
+          --export-options-plist=/Users/builder/export_options.plist
     artifacts:
-      - build/**/outputs/**/*.apk
-      - build/**/outputs/**/*.aab
-      - build/**/outputs/**/mapping.txt
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=d16ff778-d4c1-b244-c40d-203aafa7b718
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=de775d3d-c1fe-a2c5-3f8e-d39d18a3956b
