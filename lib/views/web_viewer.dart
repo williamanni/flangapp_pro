@@ -21,6 +21,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
 import 'package:collection/collection.dart';
+import 'package:flutter_fgbg/flutter_fgbg.dart';
 
 import '../config/config.dart';
 import '../models/enum/action_type.dart';
@@ -72,6 +73,7 @@ class _WebViewerState extends State<WebViewer> {
   BottomBarNavigationType currentNavType = BottomBarNavigationType.unknown;
   List<String> pagesWithNavigation = [];
   List<String> pagesWithTopBar = [];
+  StreamSubscription<FGBGType>? fgbgtSubscription;
 
   final urlController = TextEditingController();
 
@@ -104,8 +106,6 @@ class _WebViewerState extends State<WebViewer> {
       });
     }
 
-    super.initState();
-
     startServer();
 
     subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
@@ -117,6 +117,14 @@ class _WebViewerState extends State<WebViewer> {
         setState(() {
           isOffline = true;
         });
+      }
+    });
+
+    fgbgtSubscription = FGBGEvents.instance.stream.listen((event) async {
+      // FGBGType.foreground or FGBGType.background
+      if(event == FGBGType.foreground) {
+        await closeServer();
+        startServer();
       }
     });
 
@@ -135,19 +143,25 @@ class _WebViewerState extends State<WebViewer> {
     } else {
       platform = 'Unknown';
     }
+
+    super.initState();
   }
 
   @override
   dispose() async {
     subscription?.cancel();
+    fgbgtSubscription?.cancel();
 
+    await closeServer();
+    super.dispose();
+  }
+
+  closeServer() async {
     if (server != null) {
       await server!.close();
       server = null;
-      debugPrint('Server stopped.');
+      debugPrint('Server closed.');
     }
-
-    super.dispose();
   }
 
   @override
@@ -410,7 +424,9 @@ class _WebViewerState extends State<WebViewer> {
 
                   injectCss(currentItem);
                   if (progress == 100) {
-                    currentItem.pullToRefreshController?.endRefreshing();
+                    if(currentItem.pullToRefreshController != null) {
+                      currentItem.pullToRefreshController?.endRefreshing();
+                    }
                     // setState(() {
                     //   isPageLoadingInProgress = false;
                     // });
@@ -428,7 +444,9 @@ class _WebViewerState extends State<WebViewer> {
                 },
                 onLoadStop: (controller, url) async {
                   currentItem.firstPageLoaded = true;
-                  currentItem.pullToRefreshController?.endRefreshing();
+                  if(currentItem.pullToRefreshController != null) {
+                    currentItem.pullToRefreshController?.endRefreshing();
+                  }
 
                   setState(() {
                     if(pagesWithTopBar.contains(url.toString())) {
@@ -586,7 +604,9 @@ class _WebViewerState extends State<WebViewer> {
                   launchUrl(Uri.parse(downloadStartRequest.url.toString()), mode: LaunchMode.externalApplication);
                 },
                 onReceivedHttpError: (controller, request, errorResponse) async {
-                  currentItem.pullToRefreshController?.endRefreshing();
+                  if(currentItem.pullToRefreshController != null) {
+                    currentItem.pullToRefreshController?.endRefreshing();
+                  }
                   var isForMainFrame = request.isForMainFrame ?? false;
                   if (!isForMainFrame) {
                     return;
@@ -601,7 +621,9 @@ class _WebViewerState extends State<WebViewer> {
                   });
                 },
                 onReceivedError: (controller, request, error) async {
-                  currentItem.pullToRefreshController?.endRefreshing();
+                  if(currentItem.pullToRefreshController != null) {
+                    currentItem.pullToRefreshController?.endRefreshing();
+                  }
                   var isForMainFrame = request.isForMainFrame ?? false;
                   if (!isForMainFrame ||
                       (!kIsWeb &&
