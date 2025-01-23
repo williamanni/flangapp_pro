@@ -45,7 +45,7 @@ class _WebViewerState extends State<WebViewer> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   InAppWebViewSettings settings = InAppWebViewSettings(
-    mediaPlaybackRequiresUserGesture: true,
+    mediaPlaybackRequiresUserGesture: false,
     allowsInlineMediaPlayback: true,
     iframeAllow: "camera; microphone",
     iframeAllowFullscreen: true,
