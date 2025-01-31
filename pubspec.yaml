@@ -44,6 +44,7 @@ dependencies:
   dio: ^5.7.0
   onesignal_flutter: ^5.2.8
   flutter_fgbg: ^0.6.0
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:

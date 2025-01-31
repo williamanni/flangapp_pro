@@ -25,6 +25,10 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_inappwebview_ios-1.1.2" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_inappwebview-6.1.5" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_android-2.2.4" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/local_auth-2.3.0" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/local_auth_android-1.0.46" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/local_auth_darwin-1.4.3" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/local_auth_windows-1.0.11" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

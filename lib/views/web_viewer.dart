@@ -22,6 +22,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
 import 'package:collection/collection.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
+import 'package:local_auth/local_auth.dart';
 
 import '../config/config.dart';
 import '../models/enum/action_type.dart';
@@ -861,6 +862,8 @@ class _WebViewerState extends State<WebViewer> {
               // Login
               showTopBar = showBar;
 
+              showNavigation = showMenu;
+
               if (loggedIn == false) {
                 createGeneralCollection(widget.appConfig.mainNavigation,
                     BottomBarNavigationType.main);
@@ -872,15 +875,14 @@ class _WebViewerState extends State<WebViewer> {
                 isPageLoadingInProgress = false;
               }
 
-              if (showMenu == false) {
-                showNavigation = false;
-              }
-
               if (showNavigation == true) {
                 if (pagesWithNavigation.contains(currentPageUrl) == false) {
                   pagesWithNavigation.add(currentPageUrl);
                 }
               }
+
+              // TODO - remove this
+              //doBiometrics();
             }
           });
         }
@@ -955,6 +957,18 @@ class _WebViewerState extends State<WebViewer> {
               urlRequest: URLRequest(url: WebUri(url)));
         });
       }
+    }
+  }
+
+  void doBiometrics() async {
+    try {
+      final LocalAuthentication auth = LocalAuthentication();
+      final bool didAuthenticate = await auth.authenticate(
+          localizedReason: 'Please authenticate to show account balance');
+
+      debugPrint('---BIO---- Biometrics response: $didAuthenticate');
+    } on PlatformException catch(e) {
+      debugPrint('---BIO---- Biometrics exception: $e');
     }
   }
 }
