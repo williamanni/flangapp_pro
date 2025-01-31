@@ -37,6 +37,8 @@
 	<string>Need location when in use</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>microphone</string>
+	<key>NSFaceIDUsageDescription</key>
+    <string>Need face id to authenticate</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
