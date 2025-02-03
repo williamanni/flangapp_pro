@@ -425,7 +425,7 @@ class _WebViewerState extends State<WebViewer> {
 
                   injectCss(currentItem);
                   if (progress == 100) {
-                    if(currentItem.pullToRefreshController != null) {
+                    if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
                       currentItem.pullToRefreshController?.endRefreshing();
                     }
                     // setState(() {
@@ -445,7 +445,7 @@ class _WebViewerState extends State<WebViewer> {
                 },
                 onLoadStop: (controller, url) async {
                   currentItem.firstPageLoaded = true;
-                  if(currentItem.pullToRefreshController != null) {
+                  if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
                     currentItem.pullToRefreshController?.endRefreshing();
                   }
 
@@ -605,7 +605,7 @@ class _WebViewerState extends State<WebViewer> {
                   launchUrl(Uri.parse(downloadStartRequest.url.toString()), mode: LaunchMode.externalApplication);
                 },
                 onReceivedHttpError: (controller, request, errorResponse) async {
-                  if(currentItem.pullToRefreshController != null) {
+                  if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
                     currentItem.pullToRefreshController?.endRefreshing();
                   }
                   var isForMainFrame = request.isForMainFrame ?? false;
@@ -622,7 +622,7 @@ class _WebViewerState extends State<WebViewer> {
                   });
                 },
                 onReceivedError: (controller, request, error) async {
-                  if(currentItem.pullToRefreshController != null) {
+                  if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
                     currentItem.pullToRefreshController?.endRefreshing();
                   }
                   var isForMainFrame = request.isForMainFrame ?? false;
@@ -971,7 +971,7 @@ class _WebViewerState extends State<WebViewer> {
     try {
       final LocalAuthentication auth = LocalAuthentication();
       final bool didAuthenticate = await auth.authenticate(
-          localizedReason: 'Please authenticate to show account balance');
+          localizedReason: 'Please authenticate to show -TODO Custom message-');
 
       debugPrint('---BIO---- Biometrics response: $didAuthenticate');
     } on PlatformException catch(e) {
