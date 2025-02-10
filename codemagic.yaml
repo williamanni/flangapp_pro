@@ -47,7 +47,7 @@ workflows:
          
 
         BUNDLE_ID: "it.bsslab.energiamobileagent"
-      flutter: 3.16.7
+      flutter: 3.24.4
       xcode: latest
       cocoapods: default
     scripts:
@@ -72,7 +72,7 @@ workflows:
       - name: Flutter build ipa and automatic versioning
         script: |
           flutter build ipa --release --no-tree-shake-icons \
-          --build-name=1.0.5 \
+          --build-name=1.0.6 \
           --build-number=1 \
           --export-options-plist=/Users/builder/export_options.plist
     artifacts:
@@ -87,4 +87,4 @@ workflows:
       scripts:
         - name: HTTP notification
           script: |
-            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=30669343-a21b-105f-9865-e2ce177a5504
+            curl https://mobilebuilderapi.bss-lab.it/public/observe/notice?uid=70dc59fa-3d35-569f-8fcd-2524a171c560
