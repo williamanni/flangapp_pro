@@ -1,5 +1,6 @@
 import 'package:flangapp_pro/models/enum/action_type.dart';
 
+import 'custom_navigation_item.dart';
 import 'enum/background_mode.dart';
 import 'enum/load_indicator.dart';
 import 'enum/template.dart';
@@ -16,6 +17,7 @@ class AppConfig {
   final bool isDark;
   final bool pullToRefreshEnabled;
   final bool showNavigationAfterLogin;
+  final bool showGuestNavigation;
   final String customUserAgent;
   final String email;
   final Template template;
@@ -48,6 +50,8 @@ class AppConfig {
   // Navigation
   final List<NavigationItem> mainNavigation;
   final List<NavigationItem> barNavigation;
+  final List<NavigationItem> guestNavigation;
+  final List<CustomNavigationItem> customNavigation;
 
   AppConfig({
     required this.appName,
@@ -59,6 +63,7 @@ class AppConfig {
     required this.isDark,
     required this.pullToRefreshEnabled,
     required this.showNavigationAfterLogin,
+    required this.showGuestNavigation,
     required this.customUserAgent,
     required this.email,
     required this.template,
@@ -85,7 +90,9 @@ class AppConfig {
     required this.contactBtn,
     required this.backBtn,
     required this.mainNavigation,
-    required this.barNavigation
+    required this.barNavigation,
+    required this.guestNavigation,
+    required this.customNavigation
   });
 
   factory AppConfig.fromJson(Map<String, dynamic> json) {
@@ -96,7 +103,7 @@ class AppConfig {
         icon: itemJson['icon'],
         type: _convertToActionType(itemJson['type']),
         value: itemJson['value'],
-        refresh: itemJson['refresh'] ?? true, // TODO - update with the correct field after BE work is done
+        refresh: itemJson['refresh']
       );
     }).toList();
     List<dynamic> navigationItemsJsonBar = json['navigation']['bar'];
@@ -109,6 +116,26 @@ class AppConfig {
         refresh: itemJson['refresh'] ?? true, // TODO - keep also for Bar Navigation?
       );
     }).toList();
+    List<dynamic> navigationItemsJsonGuest = json['navigation']['guest'];
+    List<NavigationItem> guestNavigation = navigationItemsJsonGuest.map((itemJson) {
+      return NavigationItem(
+        name: itemJson['name'],
+        icon: itemJson['icon'],
+        type: _convertToActionType(itemJson['type']),
+        value: itemJson['value'],
+        refresh: itemJson['refresh']
+      );
+    }).toList();
+
+    List<dynamic> customNavigationItemsJson = json['custom_navigation'];
+    List<CustomNavigationItem> customNavigation = customNavigationItemsJson.map((itemJson) {
+      return CustomNavigationItem(
+        tab: itemJson['tab'],
+        link: itemJson['link'],
+        data: _getCustomNavData(itemJson['data']),
+      );
+    }).toList();
+
     return AppConfig(
       appName: json['name'],
       appLink: json['link'],
@@ -119,6 +146,7 @@ class AppConfig {
       isDark: json['is_dark'],
       pullToRefreshEnabled: json['pull_to_refresh'],
       showNavigationAfterLogin: json['show_navigation_after_login'],
+      showGuestNavigation: json['show_guest_navigation'],
       customUserAgent: json['user_agent'],
       email: json['email'],
       template: _convertToTemplate(json['template']),
@@ -146,6 +174,8 @@ class AppConfig {
       backBtn: json['localization']['back'],
       mainNavigation: mainNavigation,
       barNavigation: barNavigation,
+      guestNavigation: guestNavigation,
+      customNavigation: customNavigation,
     );
   }
 
@@ -207,5 +237,22 @@ class AppConfig {
       default:
         throw Exception('Unknown action type value: $value');
     }
+  }
+
+  static bool _convertToBool(String input) {
+    return (input.toLowerCase() == "true" || input.toLowerCase() == "1") ? true : false;
+  }
+
+  static List<NavigationItem> _getCustomNavData(dynamic itemJson) {
+    List<dynamic> customNavigationDataItemsJson = itemJson;
+    return customNavigationDataItemsJson.map((itemJson) {
+      return NavigationItem(
+        name: itemJson['name'],
+        icon: itemJson['icon'],
+        type: _convertToActionType(itemJson['type']),
+        value: itemJson['link'], // TODO - keep link? or change to value?
+        refresh: itemJson['refresh']
+      );
+    }).toList();
   }
 }

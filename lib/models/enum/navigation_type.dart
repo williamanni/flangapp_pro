@@ -1,0 +1,1 @@
+enum BottomBarNavigationType { unknown, guest, main, custom }
