@@ -41,6 +41,8 @@
 	<string>use user location</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>use user location</string>
+	<key>NSFaceIDUsageDescription</key>
+    <string>Need face id to authenticate</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

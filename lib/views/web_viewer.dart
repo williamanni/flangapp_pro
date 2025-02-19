@@ -21,6 +21,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
 import 'package:collection/collection.dart';
+import 'package:flutter_fgbg/flutter_fgbg.dart';
+import 'package:local_auth/local_auth.dart';
 
 import '../config/config.dart';
 import '../models/enum/action_type.dart';
@@ -44,7 +46,7 @@ class _WebViewerState extends State<WebViewer> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   InAppWebViewSettings settings = InAppWebViewSettings(
-    mediaPlaybackRequiresUserGesture: true,
+    mediaPlaybackRequiresUserGesture: false,
     allowsInlineMediaPlayback: true,
     iframeAllow: "camera; microphone",
     iframeAllowFullscreen: true,
@@ -72,6 +74,7 @@ class _WebViewerState extends State<WebViewer> {
   BottomBarNavigationType currentNavType = BottomBarNavigationType.unknown;
   List<String> pagesWithNavigation = [];
   List<String> pagesWithTopBar = [];
+  StreamSubscription<FGBGType>? fgbgtSubscription;
 
   final urlController = TextEditingController();
 
@@ -104,8 +107,6 @@ class _WebViewerState extends State<WebViewer> {
       });
     }
 
-    super.initState();
-
     startServer();
 
     subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
@@ -117,6 +118,14 @@ class _WebViewerState extends State<WebViewer> {
         setState(() {
           isOffline = true;
         });
+      }
+    });
+
+    fgbgtSubscription = FGBGEvents.instance.stream.listen((event) async {
+      // FGBGType.foreground or FGBGType.background
+      if(event == FGBGType.foreground) {
+        await closeServer();
+        startServer();
       }
     });
 
@@ -135,19 +144,25 @@ class _WebViewerState extends State<WebViewer> {
     } else {
       platform = 'Unknown';
     }
+
+    super.initState();
   }
 
   @override
   dispose() async {
     subscription?.cancel();
+    fgbgtSubscription?.cancel();
 
+    await closeServer();
+    super.dispose();
+  }
+
+  closeServer() async {
     if (server != null) {
       await server!.close();
       server = null;
-      debugPrint('Server stopped.');
+      debugPrint('Server closed.');
     }
-
-    super.dispose();
   }
 
   @override
@@ -410,7 +425,9 @@ class _WebViewerState extends State<WebViewer> {
 
                   injectCss(currentItem);
                   if (progress == 100) {
-                    currentItem.pullToRefreshController?.endRefreshing();
+                    if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
+                      currentItem.pullToRefreshController?.endRefreshing();
+                    }
                     // setState(() {
                     //   isPageLoadingInProgress = false;
                     // });
@@ -428,7 +445,9 @@ class _WebViewerState extends State<WebViewer> {
                 },
                 onLoadStop: (controller, url) async {
                   currentItem.firstPageLoaded = true;
-                  currentItem.pullToRefreshController?.endRefreshing();
+                  if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
+                    currentItem.pullToRefreshController?.endRefreshing();
+                  }
 
                   setState(() {
                     if(pagesWithTopBar.contains(url.toString())) {
@@ -586,7 +605,9 @@ class _WebViewerState extends State<WebViewer> {
                   launchUrl(Uri.parse(downloadStartRequest.url.toString()), mode: LaunchMode.externalApplication);
                 },
                 onReceivedHttpError: (controller, request, errorResponse) async {
-                  currentItem.pullToRefreshController?.endRefreshing();
+                  if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
+                    currentItem.pullToRefreshController?.endRefreshing();
+                  }
                   var isForMainFrame = request.isForMainFrame ?? false;
                   if (!isForMainFrame) {
                     return;
@@ -598,7 +619,9 @@ class _WebViewerState extends State<WebViewer> {
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 },
                 onReceivedError: (controller, request, error) async {
-                  currentItem.pullToRefreshController?.endRefreshing();
+                  if(widget.appConfig.pullToRefreshEnabled && currentItem.pullToRefreshController != null) {
+                    currentItem.pullToRefreshController?.endRefreshing();
+                  }
                   var isForMainFrame = request.isForMainFrame ?? false;
                   if (!isForMainFrame ||
                       (!kIsWeb &&
@@ -839,6 +862,8 @@ class _WebViewerState extends State<WebViewer> {
               // Login
               showTopBar = showBar;
 
+              showNavigation = showMenu;
+
               if (loggedIn == false) {
                 createGeneralCollection(widget.appConfig.mainNavigation,
                     BottomBarNavigationType.main);
@@ -850,15 +875,14 @@ class _WebViewerState extends State<WebViewer> {
                 isPageLoadingInProgress = false;
               }
 
-              if (showMenu == false) {
-                showNavigation = false;
-              }
-
               if (showNavigation == true) {
                 if (pagesWithNavigation.contains(currentPageUrl) == false) {
                   pagesWithNavigation.add(currentPageUrl);
                 }
               }
+
+              // TODO - remove this
+              //doBiometrics();
             }
           });
         }
@@ -933,6 +957,18 @@ class _WebViewerState extends State<WebViewer> {
               urlRequest: URLRequest(url: WebUri(url)));
         });
       }
+    }
+  }
+
+  void doBiometrics() async {
+    try {
+      final LocalAuthentication auth = LocalAuthentication();
+      final bool didAuthenticate = await auth.authenticate(
+          localizedReason: 'Please authenticate to show -TODO Custom message-');
+
+      debugPrint('---BIO---- Biometrics response: $didAuthenticate');
+    } on PlatformException catch(e) {
+      debugPrint('---BIO---- Biometrics exception: $e');
     }
   }
 }
