@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flangapp_pro/models/app_config.dart';
 import 'package:flangapp_pro/models/custom_navigation_item.dart';
 import 'package:flangapp_pro/services/hex_color.dart';
+import 'package:flangapp_pro/services/preferences.dart';
 import 'package:flangapp_pro/widgets/app_drawer.dart';
 import 'package:flangapp_pro/widgets/app_tabs.dart';
 import 'package:flangapp_pro/widgets/error_page.dart';
@@ -23,9 +24,11 @@ import 'dart:io' show Platform;
 import 'package:collection/collection.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:app_settings/app_settings.dart';
 
 import '../config/config.dart';
 import '../models/enum/action_type.dart';
+import '../models/enum/biometrics_auth_status.dart';
 import '../models/enum/load_indicator.dart';
 import '../models/enum/navigation_type.dart';
 import '../models/enum/template.dart';
@@ -59,6 +62,7 @@ class _WebViewerState extends State<WebViewer> {
   List<WebViewCollection> collection = []; // WebViewCollection items for the bottom bar navigation
   int activePage = 0;
   bool isOffline = false;
+  BiometricsAuthStatus biometricsAuthStatus = BiometricsAuthStatus.success;
   StreamSubscription<List<ConnectivityResult>>? subscription;
   bool showNavigation = false;
   bool showTopBar = false;
@@ -75,12 +79,15 @@ class _WebViewerState extends State<WebViewer> {
   List<String> pagesWithNavigation = [];
   List<String> pagesWithTopBar = [];
   StreamSubscription<FGBGType>? fgbgtSubscription;
+  bool? skipBioCheckedValue = false;
 
   final urlController = TextEditingController();
 
   @override
   void initState() {
     settings.userAgent = widget.appConfig.customUserAgent;
+
+    setPreferencesValues();
 
     if(widget.appConfig.showGuestNavigation == false) {
       // Create collection with the first item from main navigation items
@@ -126,6 +133,8 @@ class _WebViewerState extends State<WebViewer> {
       if(event == FGBGType.foreground) {
         await closeServer();
         startServer();
+
+        await doBiometrics();
       }
     });
 
@@ -157,6 +166,10 @@ class _WebViewerState extends State<WebViewer> {
     super.dispose();
   }
 
+  void setPreferencesValues() async {
+    skipBioCheckedValue = await Preferences.getBiometricsSkipValue();
+  }
+
   closeServer() async {
     if (server != null) {
       await server!.close();
@@ -165,8 +178,134 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
+  Widget getBiometricsWidget() {
+    String authenticatingMessage = '';
+
+    switch (biometricsAuthStatus) {
+      case BiometricsAuthStatus.inProgress:
+        authenticatingMessage = 'Authenticating...';
+        break;
+      case BiometricsAuthStatus.success:
+        authenticatingMessage = 'Authentication succeeded';
+        break;
+      case BiometricsAuthStatus.fail:
+        authenticatingMessage = 'Authentication failed';
+        break;
+      case BiometricsAuthStatus.unavailable:
+        authenticatingMessage = 'We suggest to enable the biometrics for a better protection';
+        break;
+      default:
+        authenticatingMessage = '';
+    }
+
+    return Scaffold(
+      body: Container(
+        color: Colors.white,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Text(authenticatingMessage, style: TextStyle(
+                    decoration: TextDecoration.none,
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                ), textAlign: TextAlign.center),
+              ),
+              Offstage(
+                offstage: biometricsAuthStatus != BiometricsAuthStatus.fail,
+                child: TextButton(
+                    style: ButtonStyle(
+                      overlayColor: MaterialStateProperty.all<Color>(
+                        HexColor.fromHex(widget.appConfig.color).withOpacity(0.15),
+                      ),
+                    ),
+                    onPressed: doBiometrics,
+                    child: Text("Retry authentication", style:
+                    TextStyle(color: HexColor.fromHex(widget.appConfig.color)))
+                ),
+              ),
+              Offstage(
+                offstage: biometricsAuthStatus != BiometricsAuthStatus.unavailable,
+                child: TextButton(
+                    style: ButtonStyle(
+                      overlayColor: MaterialStateProperty.all<Color>(
+                        HexColor.fromHex(widget.appConfig.color).withOpacity(0.15),
+                      ),
+                    ),
+                    onPressed: () {
+                      try {
+                        AppSettings.openAppSettings(type: AppSettingsType.security);
+                      } catch (e) {
+                        debugPrint("Error opening biometric settings: $e");
+                      }
+                    },
+                    child: Text("Manage security", style:
+                    TextStyle(color: HexColor.fromHex(widget.appConfig.color)))
+                ),
+              ),
+              Offstage(
+                offstage: biometricsAuthStatus != BiometricsAuthStatus.unavailable,
+                child:
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 1,
+                          height: 40,
+                        ),
+                        TextButton( // Skip
+                            style: ButtonStyle(
+                              overlayColor: MaterialStateProperty.all<Color>(
+                                HexColor.fromHex(widget.appConfig.color).withOpacity(0.15),
+                              ),
+                            ),
+                            onPressed: () async {
+                              await Preferences.setBiometricsSkipValue(skipBioCheckedValue);
+                              setState(() {
+                                biometricsAuthStatus = BiometricsAuthStatus.success;
+                              });
+                            },
+                            child: Text("Skip", style:
+                            TextStyle(color: HexColor.fromHex(widget.appConfig.color)))
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: CheckboxListTile(
+                            title: Text("Don't show again"),
+                            value: skipBioCheckedValue,
+                            checkColor: Colors.white,
+                            activeColor: HexColor.fromHex(widget.appConfig.color),
+                            onChanged: (newValue) {
+                              setState(() {
+                                skipBioCheckedValue = newValue;
+                              });
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                          ),
+                        ),
+                      ],
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    // if(showBiometricsStop == true) {
+    //   showBiometricsStopDialog(context);
+    //   return Container();
+    // }
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -206,7 +345,10 @@ class _WebViewerState extends State<WebViewer> {
         }
         SystemChannels.platform.invokeMethod('SystemNavigator.pop');
       },
-      child: Scaffold(
+      child:
+      biometricsAuthStatus != BiometricsAuthStatus.success ?
+       getBiometricsWidget()
+       : Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: true,
         // Top Bar
@@ -871,6 +1013,10 @@ class _WebViewerState extends State<WebViewer> {
                 isPageLoadingInProgress = false;
                 showNavigation = true;
                 loggedIn = true;
+
+                // TODO check if we reach this point from the login page or if the app starts with the user already logged in
+                doBiometrics();
+
               } else {
                 isPageLoadingInProgress = false;
               }
@@ -880,9 +1026,6 @@ class _WebViewerState extends State<WebViewer> {
                   pagesWithNavigation.add(currentPageUrl);
                 }
               }
-
-              // TODO - remove this
-              //doBiometrics();
             }
           });
         }
@@ -960,15 +1103,50 @@ class _WebViewerState extends State<WebViewer> {
     }
   }
 
-  void doBiometrics() async {
-    try {
-      final LocalAuthentication auth = LocalAuthentication();
-      final bool didAuthenticate = await auth.authenticate(
-          localizedReason: 'Please authenticate to show -TODO Custom message-');
+  Future<void> doBiometrics() async {
+      if(widget.appConfig.biometrics == true && loggedIn == true) {
+        final LocalAuthentication auth = LocalAuthentication();
 
-      debugPrint('---BIO---- Biometrics response: $didAuthenticate');
-    } on PlatformException catch(e) {
-      debugPrint('---BIO---- Biometrics exception: $e');
-    }
+        try {
+          setState(() {
+            biometricsAuthStatus = BiometricsAuthStatus.inProgress;
+          });
+
+          bool canCheckBiometrics = await auth.canCheckBiometrics;
+          bool isBiometricEnrolled = await auth.isDeviceSupported();
+
+          if (canCheckBiometrics && isBiometricEnrolled) {
+            // Biometrics are available and set up
+            final bool didAuthenticate = await auth.authenticate(
+                localizedReason: 'Please authenticate');
+
+            debugPrint('---BIO---- Biometrics response: $didAuthenticate');
+
+            if (didAuthenticate == true) {
+              // Continue
+
+              setState(() {
+                biometricsAuthStatus = BiometricsAuthStatus.success;
+              });
+            }
+            else {
+              // Show message and retry
+              setState(() {
+                biometricsAuthStatus = BiometricsAuthStatus.fail;
+              });
+            }
+          } else {
+            // Biometrics are not set up or supported, guide user to settings
+            setState(() {
+              biometricsAuthStatus = skipBioCheckedValue == true ? BiometricsAuthStatus.success : BiometricsAuthStatus.unavailable;
+            });
+          }
+        } catch (e) {
+          debugPrint("Error checking biometrics: $e");
+          setState(() {
+            biometricsAuthStatus = BiometricsAuthStatus.fail;
+          });
+        }
+      }
   }
 }

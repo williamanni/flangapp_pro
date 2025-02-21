@@ -46,6 +46,8 @@ dependencies:
   onesignal_flutter: ^5.2.8
   flutter_fgbg: ^0.6.0
   local_auth: ^2.3.0
+  app_settings: ^5.2.0
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   flutter_test:

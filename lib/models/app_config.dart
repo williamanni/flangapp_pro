@@ -15,6 +15,7 @@ class AppConfig {
   final String activeColor;
   final String iconColor;
   final bool isDark;
+  final bool biometrics;
   final bool pullToRefreshEnabled;
   final bool showNavigationAfterLogin;
   final bool showGuestNavigation;
@@ -61,6 +62,7 @@ class AppConfig {
     required this.activeColor,
     required this.iconColor,
     required this.isDark,
+    required this.biometrics,
     required this.pullToRefreshEnabled,
     required this.showNavigationAfterLogin,
     required this.showGuestNavigation,
@@ -144,6 +146,7 @@ class AppConfig {
       activeColor: json['active_color'],
       iconColor: json['icon_color'],
       isDark: json['is_dark'],
+      biometrics: json['biometrics'],
       pullToRefreshEnabled: json['pull_to_refresh'],
       showNavigationAfterLogin: json['show_navigation_after_login'],
       showGuestNavigation: json['show_guest_navigation'],
