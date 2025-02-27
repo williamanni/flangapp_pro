@@ -372,6 +372,11 @@ class _WebViewerState extends State<WebViewer> {
     return null;
   }
 
+  bool isItemFromMainMenu(String link) {
+    NavigationItem? item = widget.appConfig.mainNavigation.firstWhereOrNull((element) => element.value == link);
+    return item != null;
+  }
+
   Widget webContainer(int index) {
 
     WebViewCollection currentItem = collection[index];
@@ -509,9 +514,8 @@ class _WebViewerState extends State<WebViewer> {
                           // Create a new collection for the bottom bar navigation
                           createGeneralCollection(customNavItems, BottomBarNavigationType.custom);
                         }
-
                       } else {
-                        if(currentNavType != BottomBarNavigationType.main) {
+                        if(currentNavType != BottomBarNavigationType.main && isItemFromMainMenu(navigationAction.request.url.toString())) {
                           // Main navigation type
                           createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
                         }
