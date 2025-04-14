@@ -852,7 +852,7 @@ class _WebViewerState extends State<WebViewer> {
 
                 loggedIn = false;
               } else {
-                if (widget.appConfig.showGuestNavigation) {
+                if (widget.appConfig.showGuestNavigation && widget.appConfig.guestNavigation.isNotEmpty) {
                   showNavigation = true;
                 } else {
                   showNavigation = false;

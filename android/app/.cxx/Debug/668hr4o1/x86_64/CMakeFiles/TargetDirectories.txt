@@ -1,0 +1,2 @@
+/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/x86_64/CMakeFiles/edit_cache.dir
+/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/x86_64/CMakeFiles/rebuild_cache.dir
