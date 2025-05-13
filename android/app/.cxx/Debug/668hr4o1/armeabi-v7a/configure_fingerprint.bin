@@ -2,6 +2,7 @@ C/C++ Structured Logm
 k
 i/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/additional_project_files.txtC
 A
+<<<<<<< HEAD
 ?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	òœÝ›ã2 ¯œë™ã2j
 h
 f/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/android_gradle_build.json	òœÝ›ã2ž °œë™ã2o
@@ -26,3 +27,29 @@ f
 d/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/symbol_folder_index.txt	òœÝ›ã2[ ²œë™ã2S
 Q
 O/Users/bss/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt	òœÝ›ã2¤ —‚€Ö2
+=======
+?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	ïù²Ñê2 Ð¥æ­ê2j
+h
+f/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/android_gradle_build.json	ïù²Ñê2ž Ò¥æ­ê2o
+m
+k/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/android_gradle_build_mini.json	ïù²Ñê2ù Ü¥æ­ê2\
+Z
+X/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/build.ninja	ïù²Ñê2€ê Ò¤æ­ê2`
+^
+\/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/build.ninja.txt	ïù²Ñê2e
+c
+a/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/build_file_index.txt	ïù²Ñê2O Ý¥æ­ê2f
+d
+b/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/compile_commands.json	ïù²Ñê2j
+h
+f/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/compile_commands.json.bin	ïù²Ñê2	p
+n
+l/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/metadata_generation_command.txt	ïù²Ñê2
+‰	 Ý¥æ­ê2c
+a
+_/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/prefab_config.json	ðù²Ñê2( Ý¥æ­ê2h
+f
+d/Users/bss/Projects/flangapp_pro/android/app/.cxx/Debug/668hr4o1/armeabi-v7a/symbol_folder_index.txt	ðù²Ñê2[ Ý¥æ­ê2S
+Q
+O/Users/bss/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt	ðù²Ñê2¤ —‚€Ö2
+>>>>>>> main

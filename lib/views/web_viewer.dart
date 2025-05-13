@@ -100,7 +100,7 @@ class _WebViewerState extends State<WebViewer> {
       // });
       OneSignal.Notifications.addClickListener((event) {
         var additionalData = event.notification.additionalData;
-        if(additionalData != null && additionalData!.containsKey('url')) {
+        if(additionalData != null && additionalData.containsKey('url')) {
           String url = event.notification.additionalData!['url'];
           openPage(url);
         }
@@ -372,6 +372,11 @@ class _WebViewerState extends State<WebViewer> {
     return null;
   }
 
+  bool isItemFromMainMenu(String link) {
+    NavigationItem? item = widget.appConfig.mainNavigation.firstWhereOrNull((element) => element.value == link);
+    return item != null;
+  }
+
   Widget webContainer(int index) {
 
     WebViewCollection currentItem = collection[index];
@@ -509,9 +514,8 @@ class _WebViewerState extends State<WebViewer> {
                           // Create a new collection for the bottom bar navigation
                           createGeneralCollection(customNavItems, BottomBarNavigationType.custom);
                         }
-
                       } else {
-                        if(currentNavType != BottomBarNavigationType.main) {
+                        if(currentNavType != BottomBarNavigationType.main && isItemFromMainMenu(navigationAction.request.url.toString())) {
                           // Main navigation type
                           createGeneralCollection(widget.appConfig.mainNavigation, BottomBarNavigationType.main);
                         }
@@ -901,62 +905,59 @@ class _WebViewerState extends State<WebViewer> {
   void openPage(String url) async {
     List<NavigationItem> items = widget.appConfig.mainNavigation;
 
-    if (items != null) {
-      int pageMenuIndex = items.indexWhere((item) => url.startsWith(item.value));
+    int pageMenuIndex = items.indexWhere((item) => url.startsWith(item.value));
 
-      if(pageMenuIndex == -1) {
-        for (var i = 0; i < 10; i ++) {
-          if(collection[activePage].firstPageLoaded == false) {
-            await Future.delayed(Duration(seconds: 1));
-          }
-          else {
-            break;
-          }
+    if(pageMenuIndex == -1) {
+      for (var i = 0; i < 10; i ++) {
+        if(collection[activePage].firstPageLoaded == false) {
+          await Future.delayed(Duration(seconds: 1));
         }
-
-        oldPageUrl = currentPageUrl;
-        // Update current page url used in the app_tabs to highlight or not the bottom menu item
-        currentPageUrl = url;
-
-        setState(() {
-          //activePage = pageMenuIndex;
-          isPageLoadingInProgress = true;
-
-          collection[activePage].controller!.loadUrl(
-              urlRequest: URLRequest(url: WebUri(url)));
-        });
+        else {
+          break;
+        }
       }
-      else if (pageMenuIndex >= 0 && pageMenuIndex < items.length) {
-        for (var i = 0; i < 10; i ++) {
-          if(pageMenuIndex >= collection.length) {
-            await Future.delayed(Duration(seconds: 1));
-          }
-          else {
-            break;
-          }
+
+      oldPageUrl = currentPageUrl;
+      // Update current page url used in the app_tabs to highlight or not the bottom menu item
+      currentPageUrl = url;
+
+      setState(() {
+        //activePage = pageMenuIndex;
+        isPageLoadingInProgress = true;
+
+        collection[activePage].controller!.loadUrl(
+            urlRequest: URLRequest(url: WebUri(url)));
+      });
+    } else if (pageMenuIndex >= 0 && pageMenuIndex < items.length) {
+      for (var i = 0; i < 10; i ++) {
+        if(pageMenuIndex >= collection.length) {
+          await Future.delayed(Duration(seconds: 1));
         }
-
-        for (var i = 0; i < 10; i ++) {
-          if(collection[pageMenuIndex].firstPageLoaded == false) {
-            await Future.delayed(Duration(seconds: 1));
-          }
-          else {
-            break;
-          }
+        else {
+          break;
         }
-
-        oldPageUrl = currentPageUrl;
-        // Update current page url used in the app_tabs to highlight or not the bottom menu item
-        currentPageUrl = items[pageMenuIndex].value;
-
-        setState(() {
-          //activePage = pageMenuIndex;
-          isPageLoadingInProgress = true;
-
-          collection[0].controller!.loadUrl(
-              urlRequest: URLRequest(url: WebUri(url)));
-        });
       }
+
+      for (var i = 0; i < 10; i ++) {
+        if(collection[pageMenuIndex].firstPageLoaded == false) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+        else {
+          break;
+        }
+      }
+
+      oldPageUrl = currentPageUrl;
+      // Update current page url used in the app_tabs to highlight or not the bottom menu item
+      currentPageUrl = items[pageMenuIndex].value;
+
+      setState(() {
+        activePage = pageMenuIndex;
+        isPageLoadingInProgress = true;
+
+        collection[activePage].controller!.loadUrl(
+            urlRequest: URLRequest(url: WebUri(url)));
+      });
     }
   }
 
